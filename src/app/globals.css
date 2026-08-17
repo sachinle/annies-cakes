@@ -1,26 +1,203 @@
 @import "tailwindcss";
 
+/* ============================================================
+   Annie's Homemade Cakes — Bento theme
+
+   Soft pink ground, warm brown ink, and yellow / peach accents.
+   Playful and rounded rather than austere, matching the reference:
+   big bold display type, generous radii, soft shadows.
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-background: #fff0f3;
+  --color-surface: #ffffff;
+  --color-surface-soft: #fff7f9;
+
+  --color-ink: #5f4d40;
+  --color-ink-soft: #85705f;
+  --color-muted: #a4907c;
+
+  --color-accent: #e05c78;
+  --color-accent-hover: #c94663;
+  --color-pink: #ffd7e0;
+  --color-peach: #ffb26a;
+  --color-yellow: #fff35c;
+
+  --color-border: #f6dbe2;
+  --color-focus: #e05c78;
+
+  --color-success: #4a8f6b;
+  --color-warning: #c98a2e;
+  --color-error: #cf4444;
+
+  --shadow-soft: 0 2px 4px rgba(95, 77, 64, 0.04), 0 10px 30px rgba(224, 92, 120, 0.08);
+  --shadow-lift: 0 4px 8px rgba(95, 77, 64, 0.06), 0 20px 50px rgba(224, 92, 120, 0.16);
+
+  --radius-card: 26px;
+}
+
+:root[data-theme="dark"] {
+  --color-background: #241a1d;
+  --color-surface: #2f2226;
+  --color-surface-soft: #382a2e;
+
+  --color-ink: #fbeef0;
+  --color-ink-soft: #e0c9ce;
+  --color-muted: #b39aa1;
+
+  --color-accent: #ff8ba6;
+  --color-accent-hover: #ffa5ba;
+  --color-pink: #5a3a44;
+  --color-peach: #c98a55;
+  --color-yellow: #e8dc6a;
+
+  --color-border: #453036;
+  --color-focus: #ff8ba6;
+
+  --color-success: #7fbe9a;
+  --color-warning: #dfae5c;
+  --color-error: #e57676;
+
+  --shadow-soft: 0 2px 4px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.3);
+  --shadow-lift: 0 4px 8px rgba(0, 0, 0, 0.35), 0 20px 50px rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-background: var(--color-background);
+  --color-surface: var(--color-surface);
+  --color-surface-soft: var(--color-surface-soft);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-muted: var(--color-muted);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-pink: var(--color-pink);
+  --color-peach: var(--color-peach);
+  --color-yellow: var(--color-yellow);
+  --color-border: var(--color-border);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-error: var(--color-error);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-belanosima);
+  --font-sans: var(--font-poppins);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+::selection {
+  background: var(--color-yellow);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Soft pink wash used behind hero and feature bands. */
+.bg-blush {
+  background:
+    radial-gradient(60% 70% at 15% 20%, var(--color-pink) 0%, transparent 60%),
+    radial-gradient(50% 60% at 90% 10%, rgba(255, 178, 106, 0.28) 0%, transparent 55%),
+    var(--color-background);
+}
+
+/* ── Motion ─────────────────────────────────────────────────
+   CSS only. A bakery site is mostly opened on a phone over mobile
+   data; an animation library would cost more in load time than the
+   polish gains. */
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes draw-line {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 45%, transparent); }
+  70%  { box-shadow: 0 0 0 10px color-mix(in srgb, var(--color-accent) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 0%, transparent); }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Entrance animation.
+   Runs on render, purely in CSS. NOT a scroll-triggered reveal.
+
+   This used to hide content with opacity:0 and wait for an
+   IntersectionObserver to reveal it. That made whole sections depend on
+   JavaScript running, hydrating, and an observer firing correctly — and
+   when any of that was slow or didn't happen, the page sat blank. Two
+   attempts to patch it (a `js` class guard, then a timeout failsafe)
+   only changed how long the blankness lasted.
+
+   A CSS animation is guaranteed by the browser to run, with no script
+   involved, so content cannot get stuck invisible. The trade is that
+   below-the-fold sections animate before they're scrolled to, which
+   nobody sees. Content that reliably appears beats an animation nobody
+   was watching. */
+.reveal {
+  animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.float-soft { animation: float-soft 6s ease-in-out infinite; }
+
+/* Endless ticker strip. The track holds the items twice, so when the
+   first copy has scrolled away the second is exactly in its place. */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+.marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 26s linear infinite;
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+
+.snap-row {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.snap-row::-webkit-scrollbar { display: none; }
+.snap-row > * { scroll-snap-align: center; flex: 0 0 100%; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; }
+  .marquee__track { animation: none; }
 }
