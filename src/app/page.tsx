@@ -9,6 +9,7 @@ import { Marquee } from "@/components/home/Marquee";
 import { Testimonials } from "@/components/home/Testimonials";
 import { SafeImage } from "@/components/SafeImage";
 import { Reveal } from "@/components/Reveal";
+import { siteConfig } from "@/lib/site-config";
 
 // The catalogue is the only thing fetched here — everything else is
 // static content from src/content/site.ts.
@@ -20,8 +21,52 @@ export default async function Home() {
   const featured = products.filter((p) => p.isFeatured);
   const showcase = (featured.length > 0 ? featured : products).slice(0, 8);
 
+  // Organization markup, on the homepage because that's where Google
+  // looks for a site's logo. `logo` is what can appear beside the site
+  // name in results; the favicon is a separate signal, served from the
+  // icon files in src/app.
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Bakery",
+    "@id": `${siteConfig.url}/#organization`,
+    name: site.name,
+    url: siteConfig.url,
+    logo: {
+      "@type": "ImageObject",
+      url: `${siteConfig.url}/logo.png`,
+      width: 512,
+      height: 512,
+    },
+    image: `${siteConfig.url}/logo.png`,
+    description: site.seo.description,
+    telephone: site.contact.phone,
+    email: site.contact.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: site.contact.address,
+      addressLocality: site.contact.city,
+      addressRegion: site.contact.state,
+      postalCode: site.contact.pincode,
+      addressCountry: "IN",
+    },
+    // Empty entries are dropped — threads and youtube aren't filled in
+    // yet, and an empty string in sameAs is a structured-data error.
+    sameAs: [
+      site.contact.instagram,
+      site.contact.facebook,
+      site.contact.youtube,
+      site.contact.threads,
+      site.contact.mapsUrl,
+    ].filter(Boolean),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+
       <Hero />
 
       <Marquee />

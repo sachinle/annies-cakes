@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { site, fullAddress, telHref, whatsappHref } from "@/content/site";
+import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -11,7 +12,12 @@ export default function ContactPage() {
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Bakery",
+    // Same @id as the homepage block so search engines merge these into
+    // one business instead of reading them as two.
+    "@id": `${siteConfig.url}/#organization`,
     name: site.name,
+    url: siteConfig.url,
+    logo: `${siteConfig.url}/logo.png`,
     telephone: site.contact.phone,
     email: site.contact.email,
     address: {

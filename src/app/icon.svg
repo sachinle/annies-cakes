@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Annie's Homemade Cakes">
+  <title>Annie's Homemade Cakes</title>
+  <!--
+    Favicon mark: a frosted cake with a cherry.
+
+    Built for 16px first. Everything is a large, closed silhouette with
+    no strokes, no text and no fine detail, because a hairline candle or
+    a monogram serif turns to mush in a browser tab. Legibility at
+    16px is what makes a favicon look professional; detail at 512px is
+    what makes it look busy.
+
+    Three tones only — deep pink ground, white frosting, pale pink cake
+    — so the shape survives even when the icon is scaled to a favicon
+    grid or shown greyscale.
+  -->
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ec6b86"/>
+      <stop offset="1" stop-color="#d64a68"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="64" height="64" rx="15" fill="url(#ground)"/>
+
+  <!-- Plate -->
+  <rect x="9" y="48.5" width="46" height="5.5" rx="2.75" fill="#ffffff"/>
+
+  <!-- Cake body, a shade darker than the frosting so the drips read as
+       drips rather than merging into one white block. -->
+  <path d="M15 33 H49 V45.5 Q49 48.5 46 48.5 H18 Q15 48.5 15 45.5 Z" fill="#ffbdd0"/>
+
+  <!-- Frosting: domed top, three drips along the bottom edge. -->
+  <path d="M13 33 V29 Q13 23 19 23 H45 Q51 23 51 29 V33
+           Q44.75 44.5 38.5 33 Q32.25 44.5 26 33 Q19.75 44.5 13 33 Z" fill="#ffffff"/>
+
+  <!-- Cherry. The one warm accent, and the detail that reads at 16px. -->
+  <circle cx="32" cy="17" r="5.5" fill="#ffd93d"/>
+</svg>
