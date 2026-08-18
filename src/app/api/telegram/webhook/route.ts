@@ -3,6 +3,7 @@ import {
   answerCallback,
   editMessage,
   formatOrder,
+  allowedChatIds,
   isAllowedChat,
   orderKeyboard,
   sendMessage,
@@ -48,6 +49,34 @@ function secretMatches(received: string | null): boolean {
 
 // Telegram retries any non-2xx, so even refusals answer 200.
 const done = () => new Response("ok", { status: 200 });
+
+/**
+ * Configuration check, so a misconfigured deployment is visible instead
+ * of silent. Telegram only ever POSTs here; a GET is a human debugging.
+ *
+ * Deliberately booleans only — never the token, the secret, or the chat
+ * IDs. Knowing that a bot exists and is configured gets an attacker
+ * nowhere without the secret, but a leaked secret would let them drive
+ * the whole thing.
+ */
+export async function GET() {
+  const allowed = allowedChatIds();
+  const ready =
+    Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim()) &&
+    Boolean(process.env.TELEGRAM_WEBHOOK_SECRET?.trim()) &&
+    allowed.length > 0;
+
+  return Response.json({
+    ready,
+    botToken: Boolean(process.env.TELEGRAM_BOT_TOKEN?.trim()),
+    webhookSecret: Boolean(process.env.TELEGRAM_WEBHOOK_SECRET?.trim()),
+    allowedChatCount: allowed.length,
+    billingLink: Boolean(process.env.LEO_BILLING_URL),
+    hint: ready
+      ? "Environment looks complete. If buttons still spin, the webhook URL is not registered — run scripts/telegram-setup.mjs."
+      : "Set the missing variables in your hosting environment, then redeploy.",
+  });
+}
 
 export async function POST(req: Request) {
   if (!secretMatches(req.headers.get("x-telegram-bot-api-secret-token"))) {

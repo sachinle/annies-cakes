@@ -269,7 +269,11 @@ export async function placeCartOrder(
     }),
   ]);
 
-  redirect(`/account/orders?placed=${encodeURIComponent(order.order_no)}`);
+  // `from=cart` tells the orders page to empty the browser's basket.
+  // The single-cake flow omits it, because that one leaves the basket alone.
+  redirect(
+    `/account/orders?placed=${encodeURIComponent(order.order_no)}&from=cart`
+  );
 }
 
 function str(v: FormDataEntryValue | null): string {

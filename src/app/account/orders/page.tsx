@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getMyOrders, STATUS_LABELS } from "@/lib/orders";
 import { OrderTimeline } from "@/components/order/OrderTimeline";
+import { ClearCartOnPlaced } from "@/components/cart/ClearCartOnPlaced";
 
 export const metadata: Metadata = {
   title: "My Orders",
@@ -9,8 +10,9 @@ export const metadata: Metadata = {
 };
 
 export default async function OrdersPage(props: PageProps<"/account/orders">) {
-  const { placed } = await props.searchParams;
+  const { placed, from } = await props.searchParams;
   const justPlaced = typeof placed === "string" ? placed : null;
+  const fromCart = from === "cart";
   const orders = await getMyOrders();
 
   if (orders.length === 0 && !justPlaced) {
@@ -36,6 +38,8 @@ export default async function OrdersPage(props: PageProps<"/account/orders">) {
 
   return (
     <div>
+      {justPlaced && fromCart && <ClearCartOnPlaced orderNo={justPlaced} />}
+
       <h1 className="text-2xl font-semibold sm:text-3xl">My orders</h1>
 
       {justPlaced && (
