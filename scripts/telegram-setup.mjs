@@ -6,6 +6,7 @@
  *   node scripts/telegram-setup.mjs https://xyz.app # explicit base URL
  *   node scripts/telegram-setup.mjs --info          # what is registered now
  *   node scripts/telegram-setup.mjs --delete        # unregister
+ *   node scripts/telegram-setup.mjs --chats         # find your chat ID
  *
  * Telegram will only deliver updates to an HTTPS URL, so this cannot
  * point at localhost. For local testing, run a tunnel (ngrok, cloudflared)
@@ -49,6 +50,50 @@ const api = (method, body) =>
   }).then((r) => r.json());
 
 const arg = process.argv[2];
+
+if (arg === "--chats") {
+  // getUpdates is the queue Telegram keeps when no webhook is set. Send
+  // the bot a message first, then this reads it back and shows who sent
+  // it. Works before anything is deployed, which is the point — the
+  // in-bot /id command needs a live webhook, and this doesn't.
+  const res = await api("getUpdates", { timeout: 0 });
+
+  if (!res.ok) {
+    console.error(`✗ ${res.description}`);
+    process.exit(1);
+  }
+
+  const seen = new Map();
+  for (const u of res.result) {
+    const m = u.message ?? u.edited_message ?? u.callback_query?.message;
+    if (!m?.chat) continue;
+    const c = m.chat;
+    const name = [c.first_name, c.last_name].filter(Boolean).join(" ") ||
+      c.title || c.username || "(no name)";
+    seen.set(c.id, `${name}${c.username ? ` (@${c.username})` : ""} — ${c.type}`);
+  }
+
+  if (seen.size === 0) {
+    const me = await api("getMe");
+    console.log("No messages yet.");
+    console.log("");
+    console.log(`1. Open Telegram and find @${me.result?.username ?? "your bot"}`);
+    console.log("2. Send it any message (tap Start, or type hello)");
+    console.log("3. Run this again");
+    console.log("");
+    console.log("Note: this only works while no webhook is registered.");
+    console.log("If you already registered one, run --delete first.");
+    process.exit(0);
+  }
+
+  console.log("Chats that have messaged this bot:");
+  console.log("");
+  for (const [id, who] of seen) console.log(`  ${id}   ${who}`);
+  console.log("");
+  console.log("Put the ID(s) in .env.local, comma-separated for more than one:");
+  console.log(`  TELEGRAM_ALLOWED_CHAT_IDS=${[...seen.keys()].join(",")}`);
+  process.exit(0);
+}
 
 if (arg === "--info") {
   const info = await api("getWebhookInfo");

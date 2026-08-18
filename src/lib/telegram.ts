@@ -102,6 +102,28 @@ const STATUS_LABEL: Record<string, string> = {
   cancelled: "Cancelled",
 };
 
+/**
+ * Digits-only phone number with country code, for wa.me links.
+ *
+ * Customers type their number every which way — "98765 43210",
+ * "+91 98765-43210", "098765 43210". WhatsApp needs bare digits with
+ * the country code, so a plain number gets India's 91 prefixed and a
+ * leading trunk 0 is dropped.
+ */
+function waNumber(raw: string): string | null {
+  let d = String(raw ?? "").replace(/\D/g, "");
+  if (d.startsWith("0")) d = d.slice(1);
+  if (d.length === 10) d = `91${d}`;
+  // Below 11 digits it can't carry a country code, so we'd be guessing.
+  return d.length >= 11 && d.length <= 15 ? d : null;
+}
+
+/** Plain +number, which Telegram auto-links into a tap-to-call. */
+function dialable(raw: string): string {
+  const d = waNumber(raw);
+  return d ? `+${d}` : String(raw ?? "");
+}
+
 const money = (n: number) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -133,7 +155,10 @@ export function formatOrder(o: OrderForTelegram): string {
     lines,
     ``,
     o.estimatedTotal != null ? `💰 <b>${money(Number(o.estimatedTotal))}</b>` : null,
-    `👤 ${esc(o.contactName)} — <code>${esc(o.contactPhone)}</code>`,
+    // Left as plain text on purpose: Telegram auto-links a +number into
+    // a tap-to-call. Wrapping it in <code> would make it copyable but
+    // kill the link, and calling is the more common need.
+    `👤 ${esc(o.contactName)} — ${esc(dialable(o.contactPhone))}`,
     `📦 ${o.fulfillmentType === "delivery" ? "Delivery" : "Pickup"}${when ? ` · ${esc(when)}` : ""}`,
     o.address ? `📍 ${esc(o.address)}` : null,
     o.specialInstructions ? `📝 ${esc(o.specialInstructions)}` : null,
@@ -156,6 +181,21 @@ export function orderKeyboard(o: OrderForTelegram) {
   ]
     .map((row) => row.filter((b) => b !== null))
     .filter((row) => row.length > 0);
+
+  // One tap to the customer. Telegram inline buttons only accept http(s)
+  // and tg:// URLs — a tel: link is rejected outright and the whole
+  // keyboard fails to send — so calling is handled by the auto-linked
+  // number in the message body instead, and the button does WhatsApp.
+  const wa = waNumber(o.contactPhone);
+  if (wa) {
+    const greeting =
+      `Hi ${o.contactName.split(" ")[0]}, this is Annie's Homemade Cakes ` +
+      `about your order ${o.orderNo}.`;
+    rows.push([{
+      text: `💬 WhatsApp ${o.contactName.split(" ")[0]}`,
+      url: `https://wa.me/${wa}?text=${encodeURIComponent(greeting)}`,
+    } as never]);
+  }
 
   if (o.latitude && o.longitude) {
     rows.push([{
