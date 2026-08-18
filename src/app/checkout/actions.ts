@@ -6,6 +6,7 @@ import { priceLines } from "@/lib/cart-actions";
 import { checkPincode } from "@/lib/delivery";
 import { getStoreStatus } from "@/lib/store-status";
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from "@/lib/notify";
+import { pushNewOrder } from "@/lib/telegram";
 import {
   hasErrors,
   validateOrder,
@@ -238,9 +239,34 @@ export async function placeCartOrder(
         : null,
   };
 
+  // Notifications are all best-effort and run together. The order is
+  // already saved; none of these failing should cost the customer their
+  // order, so nothing here is awaited for its result.
   await Promise.allSettled([
     sendNewOrderEmail(emailData),
     sendOrderConfirmationEmail(emailData),
+    pushNewOrder({
+      id: order.id,
+      orderNo: order.order_no,
+      contactName: input.contactName,
+      contactPhone: input.contactPhone,
+      status: "received",
+      fulfillmentType: input.fulfillmentType,
+      preferredDate: input.preferredDate,
+      preferredTime: input.preferredTime || null,
+      estimatedTotal,
+      specialInstructions: input.specialInstructions || null,
+      address: emailData.address,
+      latitude: isDelivery ? input.latitude : null,
+      longitude: isDelivery ? input.longitude : null,
+      items: lines.map((l) => ({
+        name: l.name,
+        variantLabel: l.variantLabel,
+        quantity: l.quantity,
+        colour: l.colour ?? null,
+        cakeMessage: l.cakeMessage ?? null,
+      })),
+    }),
   ]);
 
   redirect(`/account/orders?placed=${encodeURIComponent(order.order_no)}`);

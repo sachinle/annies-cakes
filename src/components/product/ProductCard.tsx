@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { SafeImage } from "@/components/SafeImage";
+import { ShareButton } from "@/components/product/ShareButton";
+import { siteConfig } from "@/lib/site-config";
 import { useCart } from "@/components/cart/CartProvider";
 import { startingPrice, type PublicProduct } from "@/lib/product-types";
 import { formatMoney } from "@/lib/order-schema";
@@ -46,6 +48,23 @@ export function ProductCard({
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-[var(--radius-card)] border border-border bg-surface transition-[transform,box-shadow] duration-300 hover:-translate-y-1.5 hover:shadow-[var(--shadow-lift)]">
+      {/* The share control sits alongside the image link, not inside it —
+          a button nested in an anchor is invalid and would trigger
+          navigation as well as the share sheet. */}
+      <div className="relative">
+        <div className="absolute right-3 top-3 z-10">
+          <ShareButton
+            compact
+            placement="down"
+            url={`${siteConfig.url}/products/${product.slug}`}
+            title={product.name}
+            text={
+              product.shortDescription
+                ? `${product.name} — ${product.shortDescription}`
+                : `${product.name} from ${siteConfig.name}`
+            }
+          />
+        </div>
       <Link
         href={`/products/${product.slug}`}
         className="relative block aspect-square overflow-hidden bg-surface-soft"
@@ -65,6 +84,7 @@ export function ProductCard({
           </span>
         )}
       </Link>
+      </div>
 
       <div className="flex flex-1 flex-col p-4">
         <Link href={`/products/${product.slug}`}>

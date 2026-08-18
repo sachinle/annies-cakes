@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server-auth";
 import { getProductBySlug } from "@/lib/products";
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from "@/lib/notify";
+import { pushNewOrder } from "@/lib/telegram";
 import { checkPincode } from "@/lib/delivery";
 import { getStoreStatus } from "@/lib/store-status";
 import {
@@ -139,7 +140,7 @@ export async function placeOrder(
       contact_email: user.email ?? null,
       status: "received",
     })
-    .select("order_no")
+    .select("id, order_no")
     .single();
 
   if (error) {
@@ -182,6 +183,28 @@ export async function placeOrder(
   await Promise.allSettled([
     sendNewOrderEmail(emailData),
     sendOrderConfirmationEmail(emailData),
+    pushNewOrder({
+      id: data.id,
+      orderNo: data.order_no,
+      contactName: input.contactName,
+      contactPhone: input.contactPhone,
+      status: "received",
+      fulfillmentType: input.fulfillmentType,
+      preferredDate: input.preferredDate,
+      preferredTime: input.preferredTime || null,
+      estimatedTotal: unitPrice * input.quantity,
+      specialInstructions: input.specialInstructions || null,
+      address: emailData.address,
+      latitude: isDelivery ? input.latitude : null,
+      longitude: isDelivery ? input.longitude : null,
+      items: [{
+        name: product.name,
+        variantLabel,
+        quantity: input.quantity,
+        colour: input.colour || null,
+        cakeMessage: input.cakeMessage || null,
+      }],
+    }),
   ]);
 
   // Redirect on success so a refresh can't resubmit the order.

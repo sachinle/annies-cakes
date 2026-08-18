@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ProductImage } from "@/components/product/ProductImage";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { StoreClosedNotice } from "@/components/StoreClosedNotice";
+import { ShareButton } from "@/components/product/ShareButton";
 import { getStoreStatus } from "@/lib/store-status";
 import { notFound } from "next/navigation";
 import {
@@ -51,6 +52,11 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
   ]);
 
   if (!product) notFound();
+
+  const shareUrl = `${siteConfig.url}/products/${product.slug}`;
+  const shareText = product.shortDescription
+    ? `${product.name} — ${product.shortDescription}`
+    : `${product.name} from ${siteConfig.name}`;
 
   const enquiry = whatsappLink(
     `Hi! I'd like to order the ${product.name}. Could you help me with the details?`
@@ -175,6 +181,14 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
             >
               Ask about customisation
             </a>
+
+            {/* Sharing stays available even when the kitchen is closed —
+                a friend can still be shown the cake and order later. */}
+            <ShareButton
+              url={shareUrl}
+              title={product.name}
+              text={shareText}
+            />
           </div>
 
           <p className="mt-6 text-xs text-muted">

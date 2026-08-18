@@ -1,7 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { AuthError, requireOwner } from "@/lib/auth/verify-owner";
 import { corsHeaders, preflight } from "@/lib/cors";
-import { sendOrderStatusEmail } from "@/lib/notify";
+import { setOrderStatus } from "@/lib/order-admin";
 
 // Admin endpoint: everything the Website section of Leo Billing reads
 // and writes.
@@ -336,39 +336,11 @@ export async function POST(request: Request) {
       }
 
       case "set_order_status": {
-        const status = str(body.status);
-        const ALLOWED = [
-          "received", "confirmed", "preparing", "ready",
-          "out_for_delivery", "completed", "cancelled",
-        ];
-        if (!ALLOWED.includes(status)) return bad("Unknown status.", 400, cors);
-
-        const id = str(body.id);
-        const { data: updated, error } = await db
-          .from("orders")
-          .update({ status, updated_at: new Date().toISOString() })
-          .eq("id", id)
-          .select("order_no, product_name, contact_name, contact_email")
-          .single();
-        if (error) throw error;
-
-        // Timeline entry the customer sees on their order page.
-        await db.from("order_status_history").insert([{ order_id: id, status }]);
-
-        // Let the customer know. Failure here must not make the status
-        // change look like it failed — it already saved.
-        const emailed = updated
-          ? await sendOrderStatusEmail({
-              status,
-              orderNo: updated.order_no,
-              productName: updated.product_name,
-              customerName: updated.contact_name ?? "there",
-              customerEmail: updated.contact_email,
-              reviewUrl: process.env.NEXT_PUBLIC_GOOGLE_REVIEW_URL,
-            })
-          : false;
-
-        return ok({ ok: true, emailed }, cors);
+        // Shared with the Telegram bot so both surfaces write the same
+        // history row and send the same customer email.
+        const result = await setOrderStatus(str(body.id), str(body.status));
+        if (!result.ok) return bad(result.reason, 400, cors);
+        return ok({ ok: true, emailed: result.emailed }, cors);
       }
 
       default:
