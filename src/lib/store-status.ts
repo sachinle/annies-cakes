@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 // Whether the shop is currently taking orders, controlled from Leo
@@ -13,7 +14,14 @@ export type StoreStatus = {
 const DEFAULT_CLOSED_MESSAGE =
   "We're not taking new orders at the moment — the kitchen is full or we're away. Do message us on WhatsApp and we'll let you know when we're back.";
 
-export async function getStoreStatus(): Promise<StoreStatus> {
+export const STORE_TAG = "store-status";
+
+// Read on every page render to decide whether order buttons show.
+// Cached for a short window and invalidated by tag the moment the owner
+// flips the switch in Leo Billing, so closing the shop still takes
+// effect immediately.
+const loadStoreStatus = unstable_cache(
+  async (): Promise<StoreStatus> => {
   try {
     const { data, error } = await getSupabaseAdmin()
       .from("store_settings")
@@ -34,4 +42,11 @@ export async function getStoreStatus(): Promise<StoreStatus> {
   } catch {
     return { acceptingOrders: true, message: "" };
   }
+  },
+  ["store-status"],
+  { revalidate: 60, tags: [STORE_TAG] }
+);
+
+export async function getStoreStatus(): Promise<StoreStatus> {
+  return loadStoreStatus();
 }

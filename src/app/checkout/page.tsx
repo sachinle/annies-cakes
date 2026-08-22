@@ -37,6 +37,10 @@ export default async function CheckoutPage() {
       <CheckoutForm
         defaultName={profile?.fullName ?? ""}
         defaultPhone={profile?.phone ?? ""}
+        savedAddress={profile?.address ?? ""}
+        savedLandmark={profile?.landmark ?? ""}
+        savedCity={profile?.city ?? ""}
+        savedPincode={profile?.pincode ?? ""}
       />
     </div>
   );

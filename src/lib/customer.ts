@@ -12,6 +12,12 @@ export type CustomerProfile = {
   fullName: string | null;
   phone: string | null;
   email: string | null;
+  // Saved delivery address (migration 0015). Used to prefill checkout
+  // so a returning customer doesn't retype it on every order.
+  address: string | null;
+  landmark: string | null;
+  city: string | null;
+  pincode: string | null;
 };
 
 /**
@@ -28,18 +34,39 @@ export async function getOrCreateProfile(): Promise<CustomerProfile | null> {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: existing } = await supabase
+  // Address columns arrive with migration 0015. Selecting a column
+  // that doesn't exist is an error rather than a null, so this falls
+  // back to the original shape and the profile keeps working either
+  // way.
+  let existing: Record<string, unknown> | null = null;
+
+  const full = await supabase
     .from("website_customers")
-    .select("id, full_name, phone")
+    .select("id, full_name, phone, address, landmark, city, pincode")
     .eq("id", user.id)
     .maybeSingle();
 
+  if (full.error) {
+    const legacy = await supabase
+      .from("website_customers")
+      .select("id, full_name, phone")
+      .eq("id", user.id)
+      .maybeSingle();
+    existing = legacy.data;
+  } else {
+    existing = full.data;
+  }
+
   if (existing) {
     return {
-      id: existing.id,
-      fullName: existing.full_name,
-      phone: existing.phone,
+      id: String(existing.id),
+      fullName: (existing.full_name as string) ?? null,
+      phone: (existing.phone as string) ?? null,
       email: user.email ?? null,
+      address: (existing.address as string) ?? null,
+      landmark: (existing.landmark as string) ?? null,
+      city: (existing.city as string) ?? null,
+      pincode: (existing.pincode as string) ?? null,
     };
   }
 
@@ -60,5 +87,9 @@ export async function getOrCreateProfile(): Promise<CustomerProfile | null> {
     fullName: created?.full_name ?? seedName,
     phone: created?.phone ?? null,
     email: user.email ?? null,
+    address: null,
+    landmark: null,
+    city: null,
+    pincode: null,
   };
 }

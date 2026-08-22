@@ -10,6 +10,8 @@ import type { PublicProduct } from "@/lib/product-types";
 // scrollbar all work without any of it being reimplemented. The arrows
 // simply nudge scrollLeft, and they disable themselves at each end
 // rather than sitting there doing nothing.
+const AUTO_ADVANCE_MS = 5000;
+
 export function ProductCarousel({
   products,
   acceptingOrders = true,
@@ -41,13 +43,61 @@ export function ProductCarousel({
     };
   }, [sync]);
 
-  function nudge(direction: 1 | -1) {
+  const nudge = useCallback((direction: 1 | -1) => {
     const el = trackRef.current;
     if (!el) return;
     // Roughly one card plus its gap, so a click lands cleanly.
     const step = Math.max(240, el.clientWidth * 0.32);
     el.scrollBy({ left: step * direction, behavior: "smooth" });
-  }
+  }, []);
+
+  // Advance on its own every 5 seconds, looping back to the start once
+  // the last card is reached rather than sitting stuck at the end.
+  //
+  // Paused while the pointer is over the track, while it has keyboard
+  // focus, and while the tab is hidden — a carousel that keeps moving
+  // under someone's cursor as they reach for a card is infuriating, and
+  // one that animates in a background tab just burns battery.
+  useEffect(() => {
+    if (products.length <= 2) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const el = trackRef.current;
+    if (!el) return;
+
+    let paused = false;
+    const pause = () => { paused = true; };
+    const resume = () => { paused = false; };
+
+    el.addEventListener("pointerenter", pause);
+    el.addEventListener("pointerleave", resume);
+    el.addEventListener("focusin", pause);
+    el.addEventListener("focusout", resume);
+    // Touch counts as intent too, but there's no "leave" on a phone —
+    // so a scroll by hand pauses until the finger lifts.
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", resume, { passive: true });
+
+    const id = window.setInterval(() => {
+      if (paused || document.hidden) return;
+
+      const atRightEdge =
+        el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+
+      if (atRightEdge) el.scrollTo({ left: 0, behavior: "smooth" });
+      else nudge(1);
+    }, AUTO_ADVANCE_MS);
+
+    return () => {
+      window.clearInterval(id);
+      el.removeEventListener("pointerenter", pause);
+      el.removeEventListener("pointerleave", resume);
+      el.removeEventListener("focusin", pause);
+      el.removeEventListener("focusout", resume);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", resume);
+    };
+  }, [products.length, nudge]);
 
   if (products.length === 0) return null;
 

@@ -201,3 +201,119 @@ h1, h2, h3, h4 {
   .reveal { opacity: 1; }
   .marquee__track { animation: none; }
 }
+
+/* ── Loading states ─────────────────────────────────────────
+   A cake being built, then decorated. Pure CSS: a loader that
+   depends on JavaScript is useless, because the thing being waited
+   for is usually JavaScript. */
+
+@keyframes cake-layer-in {
+  0%       { transform: translateY(-26px) scaleX(0.6); opacity: 0; }
+  55%      { transform: translateY(0) scaleX(1.06); opacity: 1; }
+  70%, 100% { transform: translateY(0) scaleX(1); opacity: 1; }
+}
+
+@keyframes cake-cherry-drop {
+  0%       { transform: translateY(-30px) scale(0.4); opacity: 0; }
+  60%      { transform: translateY(2px) scale(1.15); opacity: 1; }
+  75%      { transform: translateY(-3px) scale(0.95); }
+  85%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes sprinkle-fall {
+  0%   { transform: translateY(-14px) rotate(0deg); opacity: 0; }
+  25%  { opacity: 1; }
+  100% { transform: translateY(30px) rotate(220deg); opacity: 0; }
+}
+
+@keyframes plate-shine {
+  0%, 100% { transform: translateX(-120%); }
+  55%, 60% { transform: translateX(320%); }
+}
+
+@keyframes loader-dots {
+  0%, 20%  { content: ""; }
+  40%      { content: "."; }
+  60%      { content: ".."; }
+  80%, 100% { content: "..."; }
+}
+
+/* The whole cake breathes so the loader never looks frozen, even at
+   the moment every layer has landed. */
+@keyframes cake-breathe {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-4px); }
+}
+
+.cake-loader__stack { animation: cake-breathe 2.4s ease-in-out infinite; }
+
+.cake-loader__layer {
+  transform-origin: center bottom;
+  animation: cake-layer-in 2.2s cubic-bezier(0.34, 1.4, 0.5, 1) infinite;
+}
+
+.cake-loader__cherry {
+  transform-origin: center bottom;
+  animation: cake-cherry-drop 2.2s cubic-bezier(0.34, 1.5, 0.5, 1) infinite;
+}
+
+.cake-loader__sprinkle { animation: sprinkle-fall 1.6s linear infinite; }
+
+.cake-loader__shine {
+  animation: plate-shine 2.6s ease-in-out infinite;
+}
+
+.cake-loader__label::after {
+  content: "";
+  animation: loader-dots 1.6s steps(1, end) infinite;
+}
+
+/* Skeleton shimmer for route-level fallbacks. */
+@keyframes skeleton-sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-border) 55%, var(--color-surface));
+  border-radius: 14px;
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--color-surface) 85%, transparent),
+    transparent
+  );
+  animation: skeleton-sweep 1.5s ease-in-out infinite;
+}
+
+/* Thin progress bar across the top while a navigation is in flight.
+   Eases toward 90% and waits — it cannot know real progress, and a bar
+   that reaches 100% before the page arrives reads as a bug. */
+@keyframes nav-progress {
+  0%   { transform: scaleX(0); }
+  40%  { transform: scaleX(0.55); }
+  75%  { transform: scaleX(0.82); }
+  100% { transform: scaleX(0.9); }
+}
+
+.nav-progress {
+  transform-origin: 0 50%;
+  animation: nav-progress 4s cubic-bezier(0.1, 0.7, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cake-loader__stack,
+  .cake-loader__layer,
+  .cake-loader__cherry,
+  .cake-loader__sprinkle,
+  .cake-loader__shine,
+  .skeleton::after { animation: none !important; }
+  .cake-loader__layer, .cake-loader__cherry { opacity: 1; }
+}

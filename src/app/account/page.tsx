@@ -22,6 +22,10 @@ export default async function AccountPage() {
           initialName={profile?.fullName ?? ""}
           initialPhone={profile?.phone ?? ""}
           email={profile?.email ?? ""}
+          initialAddress={profile?.address ?? ""}
+          initialLandmark={profile?.landmark ?? ""}
+          initialCity={profile?.city ?? ""}
+          initialPincode={profile?.pincode ?? ""}
         />
       </div>
     </div>

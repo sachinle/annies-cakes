@@ -4,12 +4,14 @@ import { ProductImage } from "@/components/product/ProductImage";
 import { AddToCartButton } from "@/components/cart/AddToCartButton";
 import { StoreClosedNotice } from "@/components/StoreClosedNotice";
 import { ShareButton } from "@/components/product/ShareButton";
+import { ProductCarousel } from "@/components/product/ProductCarousel";
 import { getStoreStatus } from "@/lib/store-status";
 import { notFound } from "next/navigation";
 import {
   formatPrice,
   getProductBySlug,
   getPublishedProducts,
+  getRelatedProducts,
   startingPrice,
 } from "@/lib/products";
 import { formatMoney } from "@/lib/order-schema";
@@ -52,6 +54,9 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
   ]);
 
   if (!product) notFound();
+
+  // Keeps someone browsing when this particular cake isn't the one.
+  const related = await getRelatedProducts(product.slug, product.category, 4);
 
   const shareUrl = `${siteConfig.url}/products/${product.slug}`;
   const shareText = product.shortDescription
@@ -197,6 +202,17 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
           </p>
         </div>
       </div>
+
+      {related.length > 0 && (
+        <section className="mt-16 border-t border-border pt-12 sm:mt-20">
+          <h2 className="font-display text-3xl text-ink sm:text-4xl">
+            You might also like
+          </h2>
+          <div className="mt-8">
+            <ProductCarousel products={related} acceptingOrders={store.acceptingOrders} />
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,4 +1,7 @@
+import { updateTag } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
+import { PRODUCTS_TAG } from "@/lib/products";
+import { STORE_TAG } from "@/lib/store-status";
 import { AuthError, requireOwner } from "@/lib/auth/verify-owner";
 import { corsHeaders, preflight } from "@/lib/cors";
 import { setOrderStatus } from "@/lib/order-admin";
@@ -259,6 +262,18 @@ export async function POST(request: Request) {
           })
           .eq("id", true);
         if (error) throw error;
+        // The storefront caches this; drop it so closing the shop takes
+        // effect on the next request rather than up to a minute later.
+        updateTag(STORE_TAG);
+        return ok({ ok: true }, cors);
+      }
+
+      // Leo Billing writes products straight to Supabase rather than
+      // through this API, so it has no other way to tell the website its
+      // catalogue changed. Without this a newly published cake would sit
+      // behind the cache until it expired on its own.
+      case "revalidate_products": {
+        updateTag(PRODUCTS_TAG);
         return ok({ ok: true }, cors);
       }
 

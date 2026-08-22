@@ -1,4 +1,5 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import type { ProductVariant, PublicProduct } from "@/lib/product-types";
 
@@ -77,31 +78,60 @@ function toPublicProduct(row: ProductRow): PublicProduct {
 }
 
 
-export async function getPublishedProducts(): Promise<PublicProduct[]> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("products")
-    .select(PUBLIC_COLUMNS)
-    .eq("is_published", true)
-    .not("slug", "is", null)
-    .order("is_featured", { ascending: false })
-    .order("name");
+// Cache tag for everything derived from the catalogue. Publishing or
+// editing a product in Leo Billing invalidates this, so a change shows
+// up straight away rather than waiting out the window below.
+export const PRODUCTS_TAG = "products";
 
-  if (error) throw new Error(`Failed to load products: ${error.message}`);
-  return (data ?? []).map(toPublicProduct);
+// The catalogue was measured at ~780ms per request against Supabase,
+// and it was being fetched on every single page render — that one query
+// was most of the site's time-to-first-byte.
+//
+// Cakes change when the owner publishes one, which is occasional, so
+// serving a slightly stale list is fine. Five minutes bounds how long a
+// change could linger if tag invalidation ever fails; in practice the
+// tag makes it immediate.
+const loadPublishedProducts = unstable_cache(
+  async (): Promise<PublicProduct[]> => {
+    const { data, error } = await getSupabaseAdmin()
+      .from("products")
+      .select(PUBLIC_COLUMNS)
+      .eq("is_published", true)
+      .not("slug", "is", null)
+      .order("is_featured", { ascending: false })
+      .order("name");
+
+    if (error) throw new Error(`Failed to load products: ${error.message}`);
+    return (data ?? []).map(toPublicProduct);
+  },
+  ["published-products"],
+  { revalidate: 300, tags: [PRODUCTS_TAG] }
+);
+
+export async function getPublishedProducts(): Promise<PublicProduct[]> {
+  return loadPublishedProducts();
 }
+
+const loadProductBySlug = unstable_cache(
+  async (slug: string): Promise<PublicProduct | null> => {
+    const { data, error } = await getSupabaseAdmin()
+      .from("products")
+      .select(PUBLIC_COLUMNS)
+      .eq("is_published", true)
+      .eq("slug", slug)
+      .maybeSingle();
+
+    if (error) throw new Error(`Failed to load product: ${error.message}`);
+    return data ? toPublicProduct(data) : null;
+  },
+  ["product-by-slug"],
+  { revalidate: 300, tags: [PRODUCTS_TAG] }
+);
 
 export async function getProductBySlug(
   slug: string
 ): Promise<PublicProduct | null> {
-  const { data, error } = await getSupabaseAdmin()
-    .from("products")
-    .select(PUBLIC_COLUMNS)
-    .eq("is_published", true)
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (error) throw new Error(`Failed to load product: ${error.message}`);
-  return data ? toPublicProduct(data) : null;
+  return loadProductBySlug(slug);
 }
 
 export async function getProductCategories(): Promise<string[]> {
@@ -112,3 +142,33 @@ export async function getProductCategories(): Promise<string[]> {
   return [...categories].sort();
 }
 
+/**
+ * Other cakes to show on a product page.
+ *
+ * Same category first, because someone looking at a brownie is more
+ * likely to want another brownie than an ice cake; the rest of the
+ * catalogue fills any remaining slots so the row is never half empty on
+ * a product that happens to be alone in its category.
+ *
+ * Reads the cached catalogue rather than issuing its own query, so this
+ * costs nothing on a warm cache.
+ */
+export async function getRelatedProducts(
+  slug: string,
+  category: string | null,
+  limit = 4
+): Promise<PublicProduct[]> {
+  const all = (await getPublishedProducts()).filter((p) => p.slug !== slug);
+
+  const sameCategory = category
+    ? all.filter((p) => p.category === category)
+    : [];
+  const others = all.filter((p) => !sameCategory.includes(p));
+
+  // Featured first within each group — those are the ones the owner
+  // actually wants pushed.
+  const rank = (a: PublicProduct, b: PublicProduct) =>
+    Number(b.isFeatured) - Number(a.isFeatured);
+
+  return [...sameCategory.sort(rank), ...others.sort(rank)].slice(0, limit);
+}

@@ -20,12 +20,17 @@ export default async function ProductsPage() {
 
   return (
     <div className="bg-blush">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-14 lg:py-20">
         <header className="max-w-xl">
-          <h1 className="font-display text-5xl text-ink sm:text-6xl">
+          {/* Compact on a phone on purpose. A 6xl heading plus three
+              lines of copy pushed every cake below the fold, so the
+              first thing a customer saw on a catalogue page was no
+              catalogue. The blurb returns on wider screens where the
+              vertical space costs nothing. */}
+          <h1 className="font-display text-3xl text-ink sm:text-5xl lg:text-6xl">
             Our Products
           </h1>
-          <p className="mt-5 leading-relaxed text-ink-soft">
+          <p className="mt-3 hidden leading-relaxed text-ink-soft sm:mt-5 sm:block">
             Every cake is baked after you order — nothing sits on a shelf.
             Sizes and decoration can be adjusted, so just ask if you don&apos;t
             see what you had in mind.

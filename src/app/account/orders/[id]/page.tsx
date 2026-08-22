@@ -5,6 +5,9 @@ import { getMyOrder, STATUS_LABELS } from "@/lib/orders";
 import { getInvoiceForOrder } from "@/lib/invoice";
 import { OrderTimeline } from "@/components/order/OrderTimeline";
 import { formatMoney } from "@/lib/order-schema";
+import { CancelOrderButton } from "@/components/order/CancelOrderButton";
+import { PayNow } from "@/components/order/PayNow";
+import { buildUpiUri, getUpiDetails, upiQrSvg } from "@/lib/payment";
 
 export const metadata: Metadata = {
   title: "Order",
@@ -22,6 +25,24 @@ export default async function OrderDetailPage(
   if (!order) notFound();
 
   const invoice = await getInvoiceForOrder(id);
+
+  // Payment is offered only when there is a bill with something left to
+  // pay. The amount comes from the invoice on the server; it is never
+  // read from the URL or the page, so it can't be tampered with.
+  const upi = invoice && invoice.amountDue > 0 ? await getUpiDetails() : null;
+  const upiUri = upi
+    ? buildUpiUri({
+        vpa: upi.vpa,
+        payeeName: upi.payeeName,
+        amount: invoice!.amountDue,
+        note: `Order ${order.orderNo}`,
+        ref: invoice!.invoiceNo,
+      })
+    : null;
+  const qrSvg = upiUri ? await upiQrSvg(upiUri) : null;
+
+  // Cancelling is the customer's call only while nothing has been baked.
+  const canCancel = order.status === "received" || order.status === "confirmed";
 
   return (
     <div>
@@ -122,12 +143,27 @@ export default async function OrderDetailPage(
               )}
             </div>
           </div>
+
+          {upi && upiUri && (
+            <PayNow
+              upiUri={upiUri}
+              qrSvg={qrSvg}
+              amount={invoice.amountDue}
+              payeeName={upi.payeeName}
+              vpa={upi.vpa}
+              invoiceNo={invoice.invoiceNo}
+            />
+          )}
         </section>
       ) : (
         <p className="mt-10 rounded-lg border border-dashed border-border bg-surface px-5 py-4 text-sm text-muted">
           Your bill will appear here once we&apos;ve confirmed the details with
           you.
         </p>
+      )}
+
+      {canCancel && (
+        <CancelOrderButton orderId={order.id} orderNo={order.orderNo} />
       )}
     </div>
   );

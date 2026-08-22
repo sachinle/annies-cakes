@@ -88,16 +88,19 @@ export function ProductCard({
 
       <div className="flex flex-1 flex-col p-4">
         <Link href={`/products/${product.slug}`}>
-          <h3 className="font-display text-lg leading-tight text-ink transition-colors hover:text-accent">
+          <h3 className="line-clamp-2 min-h-[2.4em] font-display text-lg leading-tight text-ink transition-colors hover:text-accent">
             {product.name}
           </h3>
         </Link>
 
-        {product.shortDescription && (
-          <p className="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-muted">
-            {product.shortDescription}
-          </p>
-        )}
+        {/* Always rendered, with a fixed two-line box. Cards stretch to
+            the tallest in the row, but without this the description
+            slot collapsed on products that have none, so their price
+            and Add button sat at a different height to their
+            neighbours'. */}
+        <p className="mt-1.5 line-clamp-2 min-h-[2.6em] text-[13px] leading-relaxed text-muted">
+          {product.shortDescription ?? ""}
+        </p>
 
         <div className="mt-auto flex items-end justify-between gap-3 pt-4">
           <p className="font-display text-xl text-accent">

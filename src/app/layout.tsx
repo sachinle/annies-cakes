@@ -3,6 +3,7 @@ import { Belanosima, Poppins } from "next/font/google";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileStickyBar } from "@/components/layout/MobileStickyBar";
+import { NavProgress } from "@/components/layout/NavProgress";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { getUser } from "@/lib/supabase/server-auth";
 import { site } from "@/content/site";
@@ -57,6 +58,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col bg-background pb-16 text-ink md:pb-0">
         <CartProvider signedIn={signedIn}>
+          <NavProgress />
           <Header />
           <main className="flex-1">{children}</main>
           <Footer />

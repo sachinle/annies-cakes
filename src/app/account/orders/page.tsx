@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getMyOrders, STATUS_LABELS } from "@/lib/orders";
 import { OrderTimeline } from "@/components/order/OrderTimeline";
 import { ClearCartOnPlaced } from "@/components/cart/ClearCartOnPlaced";
+import { CancelOrderInline } from "@/components/order/CancelOrderInline";
 
 export const metadata: Metadata = {
   title: "My Orders",
@@ -110,6 +111,10 @@ export default async function OrdersPage(props: PageProps<"/account/orders">) {
                 >
                   View bill
                 </Link>
+              )}
+              {/* Third action, only while nothing has been baked yet. */}
+              {(order.status === "received" || order.status === "confirmed") && (
+                <CancelOrderInline orderId={order.id} orderNo={order.orderNo} />
               )}
             </div>
           </li>

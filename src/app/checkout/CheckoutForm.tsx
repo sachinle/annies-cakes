@@ -18,9 +18,19 @@ import {
 export function CheckoutForm({
   defaultName,
   defaultPhone,
+  savedAddress = "",
+  savedLandmark = "",
+  savedCity = "",
+  savedPincode = "",
 }: {
   defaultName: string;
   defaultPhone: string;
+  /** From the customer's profile, so a returning customer doesn't
+   *  retype an address they've already given us. */
+  savedAddress?: string;
+  savedLandmark?: string;
+  savedCity?: string;
+  savedPincode?: string;
 }) {
   const { lines, total, ready } = useCart();
   const [state, formAction, pending] = useActionState<CheckoutState, FormData>(
@@ -29,7 +39,9 @@ export function CheckoutForm({
   );
 
   const [fulfillment, setFulfillment] = useState<"pickup" | "delivery">("pickup");
-  const [pincode, setPincode] = useState("");
+  // Seeded from the saved profile, so a returning customer lands on
+  // the delivery step with their pincode already in place.
+  const [pincode, setPincode] = useState(savedPincode);
   const [pinResult, setPinResult] = useState<PincodeResult | null>(null);
   const [checkingPin, setCheckingPin] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -301,16 +313,18 @@ export function CheckoutForm({
                     <textarea
                       name="address"
                       rows={2}
+                      defaultValue={savedAddress}
+                      autoComplete="street-address"
                       placeholder="House / flat, street, area"
                       className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-ink outline-none placeholder:text-muted focus:border-accent"
                     />
                   </Field>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Landmark">
-                      <input name="landmark" placeholder="Near…" className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-ink outline-none placeholder:text-muted focus:border-accent" />
+                      <input name="landmark" defaultValue={savedLandmark} placeholder="Near…" className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-ink outline-none placeholder:text-muted focus:border-accent" />
                     </Field>
                     <Field label="City">
-                      <input name="city" className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-ink outline-none focus:border-accent" />
+                      <input name="city" defaultValue={savedCity} autoComplete="address-level2" className="w-full rounded-lg border border-border bg-surface px-3.5 py-2.5 text-ink outline-none focus:border-accent" />
                     </Field>
                   </div>
                   <button
