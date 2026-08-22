@@ -34,15 +34,15 @@ export function SafeImage({
   if (failed) {
     return (
       <div
-        className="flex h-full w-full flex-col items-center justify-center gap-1 bg-pink/40 text-center"
+        className="flex h-full w-full flex-col items-center justify-center gap-1 bg-pink text-center"
         aria-hidden="true"
       >
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="text-accent/50">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" className="text-ink">
           <rect x="3" y="4" width="18" height="16" rx="3" />
           <circle cx="9" cy="10" r="1.6" />
           <path d="M3 16l5-4 4 3 3-2 6 5" strokeLinejoin="round" />
         </svg>
-        <span className="px-3 text-[11px] font-medium text-accent/70">
+        <span className="px-3 text-[11px] font-medium text-ink">
           {label ?? alt}
         </span>
       </div>

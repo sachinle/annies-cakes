@@ -216,7 +216,9 @@ export function CatalogueBrowser({
               <ProductCard
                 key={p.id}
                 product={p}
-                priority={i < 4}
+                /* Only the first row. Anything lower is scrolled to,
+                   and preloading it just delays what is on screen. */
+                priority={i < 2}
                 acceptingOrders={acceptingOrders}
               />
             ))}

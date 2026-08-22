@@ -107,14 +107,19 @@ export function ProductCarousel({
         ref={trackRef}
         className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-2 sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {products.map((product, i) => (
+        {products.map((product) => (
           <div
             key={product.id}
             className="w-[calc(50%-8px)] shrink-0 snap-start sm:w-[calc(40%-12px)] lg:w-[calc(25%-18px)]"
           >
             <ProductCard
               product={product}
-              priority={i < 4}
+              /* Never priority. This carousel is below the fold on every
+                 screen size, and marking four cards priority emitted
+                 four <link rel=preload as=image> tags that competed
+                 with the hero for bandwidth — on throttled 4G that is
+                 enough to stop the real LCP image finishing at all. */
+              priority={false}
               acceptingOrders={acceptingOrders}
             />
           </div>

@@ -102,7 +102,7 @@ function Card({
       <p className={`font-display text-xl ${primary ? "text-white" : "text-ink"}`}>
         {title}
       </p>
-      <p className={`mt-1.5 text-sm ${primary ? "text-white/85" : "text-muted"}`}>
+      <p className={`mt-1.5 text-sm ${primary ? "text-on-accent" : "text-muted"}`}>
         {body}
       </p>
     </a>

@@ -183,17 +183,20 @@ export default async function Home() {
           </Reveal>
 
           <ol className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Reveal renders as <li> here: it sits directly inside the
+                <ol>, and a <div> in that position breaks list semantics
+                so the list stops being announced as one. */}
             {site.howItWorks.steps.map((step, i) => (
-              <Reveal key={step.title} delay={i * 80}>
-                <li className="h-full rounded-[var(--radius-card)] bg-surface p-7">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink font-display text-lg text-white">
+              <Reveal as="li" key={step.title} delay={i * 80} className="h-full">
+                <div className="h-full rounded-[var(--radius-card)] bg-surface p-7">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-ink font-display text-lg text-on-accent">
                     {i + 1}
                   </span>
                   <p className="mt-4 font-display text-xl text-ink">{step.title}</p>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
                     {step.body}
                   </p>
-                </li>
+                </div>
               </Reveal>
             ))}
           </ol>
@@ -213,11 +216,11 @@ export default async function Home() {
 
         <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {site.mostLoved.items.map((item, i) => (
-            <Reveal key={item.name} delay={i * 60}>
-              <li className="flex h-full items-start gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-6">
+            <Reveal as="li" key={item.name} delay={i * 60} className="h-full">
+              <div className="flex h-full items-start gap-4 rounded-[var(--radius-card)] border border-border bg-surface p-6">
                 <span
                   aria-hidden="true"
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink font-display text-lg text-accent"
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-pink font-display text-lg text-ink"
                 >
                   {i + 1}
                 </span>
@@ -225,7 +228,7 @@ export default async function Home() {
                   <p className="font-display text-xl text-ink">{item.name}</p>
                   <p className="mt-1 text-sm text-muted">{item.note}</p>
                 </div>
-              </li>
+              </div>
             </Reveal>
           ))}
         </ul>
@@ -326,7 +329,9 @@ export default async function Home() {
             <h2 className="font-display text-4xl text-white sm:text-5xl">
               {site.finalCta.heading}
             </h2>
-            <p className="mx-auto mt-4 max-w-md text-white/85">
+            {/* Solid, not white/85 — the translucent version measured under
+                4.5:1 against the accent band behind it. */}
+            <p className="mx-auto mt-4 max-w-md text-on-accent">
               {site.finalCta.body}
             </p>
             <Link

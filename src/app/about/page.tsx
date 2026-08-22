@@ -54,8 +54,8 @@ export default function AboutPage() {
           />
 
           {about.chapters.map((chapter, i) => (
-            <Reveal key={chapter.year} delay={i * 80}>
-              <li className="relative flex gap-6 pb-12 last:pb-0">
+            <Reveal as="li" key={chapter.year} delay={i * 80}>
+              <div className="relative flex gap-6 pb-12 last:pb-0">
                 <span
                   aria-hidden="true"
                   className="relative z-10 mt-1 h-7 w-7 shrink-0 rounded-full border-4 border-background bg-accent sm:h-8 sm:w-8"
@@ -71,7 +71,7 @@ export default function AboutPage() {
                     {chapter.body}
                   </p>
                 </div>
-              </li>
+              </div>
             </Reveal>
           ))}
         </ol>
@@ -82,10 +82,10 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-8 px-4 sm:px-6 md:grid-cols-4">
           {site.stats.map((s) => (
             <div key={s.label} className="text-center">
-              <p className="font-display text-4xl text-white sm:text-5xl">
+              <p className="font-display text-4xl text-on-accent sm:text-5xl">
                 {s.value}
               </p>
-              <p className="mt-1.5 text-sm text-white/80">{s.label}</p>
+              <p className="mt-1.5 text-sm text-on-accent">{s.label}</p>
             </div>
           ))}
         </div>

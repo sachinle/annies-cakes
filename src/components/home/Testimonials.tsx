@@ -94,7 +94,7 @@ function ReviewCard({
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-peach" aria-label={`${rating} out of 5`}>
+      <div className="mt-4 text-sm text-star" aria-label={`${rating} out of 5`}>
         {"★".repeat(rating)}
       </div>
 
@@ -112,12 +112,18 @@ function ReviewCard({
 // wrong often enough to be insulting. Initials are what Gmail, Slack
 // and every other serious product do, and they never misrepresent
 // anyone.
+// These carry white initials, so each one has to clear 4.5:1 against
+// white on its own. The previous set used --color-peach (1.78:1),
+// --color-warning (2.93:1) and --color-success (3.87:1), all of which
+// failed. These are fixed hex values rather than theme tokens because
+// the theme tokens are tuned for surfaces and borders, not for being a
+// text background.
 const AVATAR_COLOURS = [
-  "bg-accent",
-  "bg-peach",
-  "bg-ink",
-  "bg-success",
-  "bg-warning",
+  "bg-[#a83f5e]", // rose      5.94:1
+  "bg-[#8a5e19]", // amber     5.68:1
+  "bg-[#3d7a59]", // green     5.09:1
+  "bg-[#2f6f8f]", // blue      5.54:1
+  "bg-[#7a4a8f]", // violet    6.56:1
 ];
 
 function Avatar({ name }: { name: string }) {

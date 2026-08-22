@@ -41,6 +41,10 @@
   --color-pink: #ffd7e0;
   --color-peach: #ffb26a;
   --color-yellow: #fff35c;
+  /* Rating stars are text, so they need 4.5:1 like any other text.
+     --color-peach managed 1.78:1 on white. This amber reads as gold
+     at star size and clears the bar at 4.98:1. */
+  --color-star: #96661c;
 
   --color-border: #f6dbe2;
   --color-focus: #e05c78;
@@ -70,6 +74,7 @@
   --color-pink: #5a3a44;
   --color-peach: #c98a55;
   --color-yellow: #e8dc6a;
+  --color-star: #f0c05a;
 
   --color-border: #453036;
   --color-focus: #ff8ba6;
@@ -95,6 +100,7 @@
   --color-pink: var(--color-pink);
   --color-peach: var(--color-peach);
   --color-yellow: var(--color-yellow);
+  --color-star: var(--color-star);
   --color-border: var(--color-border);
   --color-success: var(--color-success);
   --color-warning: var(--color-warning);
@@ -110,11 +116,21 @@ body {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
-  color: var(--color-ink);
-  letter-spacing: -0.01em;
-  line-height: 1.05;
+/* In @layer base on purpose.
+   Unlayered CSS beats anything inside a layer regardless of
+   specificity, and Tailwind's utilities live in @layer utilities. With
+   this rule unlayered, `color: var(--color-ink)` silently overrode
+   every `text-white` on a heading — so "Planning something special?"
+   rendered dark brown on the accent band at 1.5:1 despite the markup
+   asking for white. Inside @layer base it is a default that utilities
+   can override, which is what a base style is supposed to be. */
+@layer base {
+  h1, h2, h3, h4 {
+    font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+    color: var(--color-ink);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
 }
 
 ::selection {
@@ -252,11 +268,12 @@ h1, h2, h3, h4 {
   55%, 60% { transform: translateX(320%); }
 }
 
+/* Animating `content` forces a layout+paint on every step and cannot
+   run on the compositor — Lighthouse flags it as a non-composited
+   animation. Fading a fixed ellipsis is composited and looks the same. */
 @keyframes loader-dots {
-  0%, 20%  { content: ""; }
-  40%      { content: "."; }
-  60%      { content: ".."; }
-  80%, 100% { content: "..."; }
+  0%, 20%   { opacity: 0; }
+  50%, 100% { opacity: 1; }
 }
 
 /* The whole cake breathes so the loader never looks frozen, even at
@@ -285,8 +302,9 @@ h1, h2, h3, h4 {
 }
 
 .cake-loader__label::after {
-  content: "";
-  animation: loader-dots 1.6s steps(1, end) infinite;
+  content: "6"; /* … */
+  display: inline-block;
+  animation: loader-dots 1.6s ease-in-out infinite alternate;
 }
 
 /* Skeleton shimmer for route-level fallbacks. */
