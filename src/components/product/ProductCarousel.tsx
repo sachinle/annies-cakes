@@ -160,7 +160,7 @@ function ArrowButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={direction === "left" ? "Scroll left" : "Scroll right"}
-      className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink text-ink transition-all hover:bg-ink hover:text-white disabled:cursor-default disabled:border-border disabled:text-muted disabled:hover:bg-transparent disabled:hover:text-muted"
+      className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-ink bg-transparent text-ink opacity-100 transition-opacity duration-200 hover:opacity-60 disabled:cursor-default disabled:border-border disabled:text-muted disabled:opacity-40"
     >
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
         <path

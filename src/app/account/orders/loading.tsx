@@ -1,6 +1,8 @@
+// Holds a full viewport so the footer stays below the fold while
+// content streams in — see src/app/loading.tsx for why.
 export default function Loading() {
   return (
-    <div>
+    <div className="min-h-svh">
       <div className="skeleton h-9 w-44" />
       <div className="mt-8 space-y-5">
         {[0, 1, 2].map((i) => (

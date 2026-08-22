@@ -1,9 +1,11 @@
+// Holds a full viewport so the footer stays below the fold while
+// content streams in — see src/app/loading.tsx for why.
 // Catalogue skeleton. Mirrors the real layout — header, filter row,
 // card grid — so the page doesn't jump when the cakes arrive.
 export default function Loading() {
   return (
     <div className="bg-blush">
-      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
+      <div className="mx-auto min-h-svh max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
         <div className="skeleton h-12 w-72 max-w-full" />
         <div className="skeleton mt-5 h-4 w-full max-w-xl" />
         <div className="skeleton mt-2 h-4 w-2/3 max-w-md" />
