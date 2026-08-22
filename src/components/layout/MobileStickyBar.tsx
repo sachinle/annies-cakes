@@ -22,7 +22,7 @@ export function MobileStickyBar() {
       </a>
       <Link
         href="/products"
-        className="flex flex-1 items-center justify-center bg-accent py-3.5 text-sm font-semibold text-white"
+        className="flex flex-1 items-center justify-center bg-accent py-3.5 text-sm font-semibold text-on-accent"
       >
         Order Now
       </Link>

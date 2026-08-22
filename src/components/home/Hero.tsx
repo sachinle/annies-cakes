@@ -44,7 +44,12 @@ export function Hero() {
               place; the container then sizes itself to the tallest one,
               which also stops the layout jumping between slides.
               Without grid here the slides simply stack down the page. */}
-          <div className="grid">
+          {/* A reserved minimum height, so nothing below the hero can be
+              pushed around by the copy resizing — whether that is the
+              slide rotating to longer text or a webfont landing and
+              re-flowing a 4.4rem heading. Layout shift above the fold is
+              the most expensive kind. */}
+          <div className="grid min-h-[19rem] sm:min-h-[22rem] lg:min-h-[24rem]">
             {slides.map((s, i) => {
               const isCurrent = i === index % slides.length;
               return (
@@ -63,14 +68,21 @@ export function Hero() {
                     {s.eyebrow}
                   </span>
 
-                  <h1 className="mt-5 font-display text-[3rem] leading-[0.95] text-ink sm:text-[3.8rem] lg:text-[4.4rem]">
+                  {/* Only the first slide is a real <h1>.
+                      All five slides live in the DOM at once so they can
+                      cross-fade, which previously meant the page shipped
+                      five <h1> elements — search engines and screen
+                      readers both read every one of them, not just the
+                      visible slide. The rest are styled divs, so the
+                      document has exactly one top-level heading. */}
+                  <Heading as={i === 0 ? "h1" : "div"}>
                     {s.headingTop}
                     <span className="ml-3 align-middle font-sans text-2xl font-light italic text-accent sm:text-3xl">
                       {s.headingAccent}
                     </span>
                     <br />
                     {s.headingBottom}
-                  </h1>
+                  </Heading>
 
                   <p className="mt-5 max-w-lg text-[15px] leading-relaxed text-ink-soft sm:text-base">
                     {s.body}
@@ -85,7 +97,7 @@ export function Hero() {
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href={site.hero.primaryCta.href}
-              className="rounded-full bg-ink px-8 py-4 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition-all hover:bg-accent hover:shadow-[var(--shadow-lift)]"
+              className="rounded-full bg-ink px-8 py-4 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:bg-accent hover:shadow-[var(--shadow-lift)]"
             >
               {site.hero.primaryCta.label}
             </Link>
@@ -161,5 +173,19 @@ export function Hero() {
         </div>
       </div>
     </section>
+  );
+}
+
+function Heading({
+  as: Tag,
+  children,
+}: {
+  as: "h1" | "div";
+  children: React.ReactNode;
+}) {
+  return (
+    <Tag className="mt-5 font-display text-[3rem] leading-[0.95] text-ink sm:text-[3.8rem] lg:text-[4.4rem]">
+      {children}
+    </Tag>
   );
 }

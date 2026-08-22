@@ -23,7 +23,7 @@ export default function NotFound() {
         <div className="mt-9 flex flex-wrap justify-center gap-3">
           <Link
             href="/products"
-            className="rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent"
+            className="rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent"
           >
             Browse Our Cakes
           </Link>

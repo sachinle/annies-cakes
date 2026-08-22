@@ -27,7 +27,7 @@ export function CartView() {
         </p>
         <Link
           href="/products"
-          className="mt-7 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          className="mt-7 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
         >
           Browse our cakes
         </Link>
@@ -136,7 +136,7 @@ export function CartView() {
 
         <Link
           href="/checkout"
-          className="mt-6 flex w-full items-center justify-center rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)]"
+          className="mt-6 flex w-full items-center justify-center rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)]"
         >
           Continue to Order
         </Link>

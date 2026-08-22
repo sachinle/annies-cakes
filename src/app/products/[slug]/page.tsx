@@ -171,7 +171,7 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
             {store.acceptingOrders && (
             <Link
               href={`/products/${product.slug}/order`}
-              className="inline-flex items-center rounded-full border border-accent px-6 py-3 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
+              className="inline-flex items-center rounded-full border border-accent px-6 py-3 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-on-accent"
             >
               Order just this one
             </Link>

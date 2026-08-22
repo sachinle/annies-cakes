@@ -28,7 +28,7 @@ export default async function OrdersPage(props: PageProps<"/account/orders">) {
           </p>
           <Link
             href="/products"
-            className="mt-6 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+            className="mt-6 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
           >
             Browse cakes
           </Link>
@@ -107,7 +107,7 @@ export default async function OrdersPage(props: PageProps<"/account/orders">) {
               {order.hasInvoice && (
                 <Link
                   href={`/account/orders/${order.id}`}
-                  className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+                  className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
                 >
                   View bill
                 </Link>

@@ -126,8 +126,8 @@ export function ProductCard({
               !acceptingOrders
                 ? "cursor-not-allowed bg-border text-muted"
                 : added
-                  ? "bg-success text-white"
-                  : "bg-ink text-white hover:bg-accent"
+                  ? "bg-success text-on-accent"
+                  : "bg-ink text-on-accent hover:bg-accent"
             }`}
           >
             {added ? (

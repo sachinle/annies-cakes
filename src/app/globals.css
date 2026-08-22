@@ -14,11 +14,30 @@
   --color-surface-soft: #fff7f9;
 
   --color-ink: #5f4d40;
-  --color-ink-soft: #85705f;
-  --color-muted: #a4907c;
+  /* Darkened for WCAG AA. The previous values were measured against the
+     three surfaces they actually sit on and failed: muted #a4907c came
+     out at 2.77:1 on the pink background — well under the 4.5:1 needed
+     for body text — and ink-soft was 4.24:1. These pass on white, on
+     the pink ground, and on surface-soft. */
+  --color-ink-soft: #7d6857;   /* was #85705f — 4.24:1 on background */
+  --color-muted: #786552;      /* was #a4907c — 2.77:1 on background */
 
-  --color-accent: #e05c78;
-  --color-accent-hover: #c94663;
+  /* Accent carries white button text and small links, so it needs 4.5:1
+     both ways. #e05c78 managed only 3.52:1 in both directions, which
+     failed every button on the site. This is a deeper rose that clears
+     it (5.34:1 on white, 4.84:1 on the pink ground) while staying
+     unmistakably the same brand colour.
+
+     The soft pink itself is untouched — --color-pink, --color-peach and
+     --color-yellow are decorative fills, never text, so they keep the
+     original palette exactly. */
+  --color-accent: #c62f52;       /* was #e05c78 */
+  /* Text colour for anything sitting ON the accent. White works on
+     the light rose (5.34:1) but only manages 2.21:1 on the pale
+     dark-mode accent, so dark mode flips it to near-black (7.65:1)
+     rather than shipping unreadable buttons in one theme. */
+  --color-on-accent: #ffffff;
+  --color-accent-hover: #a82241; /* was #c94663 */
   --color-pink: #ffd7e0;
   --color-peach: #ffb26a;
   --color-yellow: #fff35c;
@@ -30,8 +49,8 @@
   --color-warning: #c98a2e;
   --color-error: #cf4444;
 
-  --shadow-soft: 0 2px 4px rgba(95, 77, 64, 0.04), 0 10px 30px rgba(224, 92, 120, 0.08);
-  --shadow-lift: 0 4px 8px rgba(95, 77, 64, 0.06), 0 20px 50px rgba(224, 92, 120, 0.16);
+  --shadow-soft: 0 2px 4px rgba(95, 77, 64, 0.04), 0 10px 30px rgba(198, 47, 82, 0.08);
+  --shadow-lift: 0 4px 8px rgba(95, 77, 64, 0.06), 0 20px 50px rgba(198, 47, 82, 0.16);
 
   --radius-card: 26px;
 }
@@ -47,6 +66,7 @@
 
   --color-accent: #ff8ba6;
   --color-accent-hover: #ffa5ba;
+  --color-on-accent: #241a1d;
   --color-pink: #5a3a44;
   --color-peach: #c98a55;
   --color-yellow: #e8dc6a;
@@ -71,6 +91,7 @@
   --color-muted: var(--color-muted);
   --color-accent: var(--color-accent);
   --color-accent-hover: var(--color-accent-hover);
+  --color-on-accent: var(--color-on-accent);
   --color-pink: var(--color-pink);
   --color-peach: var(--color-peach);
   --color-yellow: var(--color-yellow);

@@ -121,7 +121,7 @@ export function OrderForm({
                   aria-pressed={variantLabel === v.label}
                   className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                     variantLabel === v.label
-                      ? "border-accent bg-accent text-white"
+                      ? "border-accent bg-accent text-on-accent"
                       : "border-border text-ink hover:border-accent"
                   }`}
                 >
@@ -274,7 +274,7 @@ export function OrderForm({
                   <button
                     type="button"
                     onClick={() => setFulfillment("pickup")}
-                    className="mt-3 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+                    className="mt-3 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
                   >
                     Switch to pickup
                   </button>
@@ -381,7 +381,7 @@ export function OrderForm({
         <button
           type="submit"
           disabled={pending}
-          className="mt-5 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover disabled:opacity-60"
+          className="mt-5 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover disabled:opacity-60"
         >
           {pending ? "Sending your request…" : "Send Order Request"}
         </button>

@@ -3,6 +3,7 @@ import { site, fullAddress, telHref, whatsappHref } from "@/content/site";
 import { siteConfig } from "@/lib/site-config";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/contact" },
   title: "Contact",
   description: `Call, WhatsApp, or visit ${site.name} in ${site.contact.city}.`,
 };
@@ -94,7 +95,7 @@ function Card({
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       className={`rounded-[var(--radius-card)] border p-6 transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-soft)] ${
         primary
-          ? "border-accent bg-accent text-white"
+          ? "border-accent bg-accent text-on-accent"
           : "border-border bg-surface"
       }`}
     >

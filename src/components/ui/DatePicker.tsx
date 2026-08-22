@@ -138,7 +138,7 @@ export function DatePicker({
                   }}
                   className={`flex h-9 items-center justify-center rounded-full text-sm transition-colors ${
                     isSelected
-                      ? "bg-accent font-semibold text-white"
+                      ? "bg-accent font-semibold text-on-accent"
                       : disabled
                         ? "cursor-not-allowed text-muted/40"
                         : "text-ink hover:bg-pink"

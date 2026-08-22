@@ -119,7 +119,7 @@ export function CheckoutForm({
         <p className="font-display text-xl text-ink">Your basket is empty</p>
         <Link
           href="/products"
-          className="mt-6 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-hover"
+          className="mt-6 inline-flex rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent hover:bg-accent-hover"
         >
           Browse our cakes
         </Link>
@@ -299,7 +299,7 @@ export function CheckoutForm({
                     <button
                       type="button"
                       onClick={() => setFulfillment("pickup")}
-                      className="mt-3 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-white hover:bg-accent-hover"
+                      className="mt-3 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-on-accent hover:bg-accent-hover"
                     >
                       Switch to pickup
                     </button>
@@ -382,7 +382,7 @@ export function CheckoutForm({
         <button
           type="submit"
           disabled={pending}
-          className="mt-6 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)] disabled:opacity-60"
+          className="mt-6 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)] disabled:opacity-60"
         >
           {pending ? "Sending your request…" : "Send Order Request"}
         </button>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PlaceholderPage } from "@/components/PlaceholderPage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/reviews" },
   title: "Reviews",
   description: "What customers say about their cakes.",
 };

@@ -33,7 +33,7 @@ export default function Error({
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <button
           onClick={reset}
-          className="inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          className="inline-flex items-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover"
         >
           Try again
         </button>

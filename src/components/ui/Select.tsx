@@ -119,7 +119,7 @@ export function Select({
                   onMouseEnter={() => setActive(i)}
                   className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-left text-sm transition-colors ${
                     isSelected
-                      ? "bg-accent text-white"
+                      ? "bg-accent text-on-accent"
                       : i === active
                         ? "bg-pink text-ink"
                         : "text-ink-soft"

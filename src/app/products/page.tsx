@@ -7,6 +7,7 @@ import { CatalogueBrowser } from "@/components/product/CatalogueBrowser";
 import { whatsappHref } from "@/content/site";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/products" },
   title: "Our Products",
   description:
     "Browse our homemade cakes — fresh cream cakes, bento cakes, brownies and more, baked to order.",
@@ -71,7 +72,7 @@ function EmptyState() {
           href={whatsappHref("Hi! I'd like to ask about ordering a cake.")}
           target="_blank"
           rel="noopener noreferrer"
-          className="rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent"
+          className="rounded-full bg-ink px-7 py-3.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent"
         >
           Ask on WhatsApp
         </a>

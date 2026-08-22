@@ -58,7 +58,7 @@ export function PayNow({
         */}
         <a
           href={upiUri}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)]"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-7 py-3.5 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)]"
         >
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
             <rect x="2.5" y="5" width="19" height="14" rx="2.5" />
@@ -72,7 +72,7 @@ export function PayNow({
             type="button"
             onClick={() => setShowQr((v) => !v)}
             aria-expanded={showQr}
-            className="inline-flex items-center gap-2 rounded-full border border-accent px-6 py-3.5 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-white"
+            className="inline-flex items-center gap-2 rounded-full border border-accent px-6 py-3.5 text-sm font-semibold text-accent transition-colors hover:bg-accent hover:text-on-accent"
           >
             {showQr ? "Hide QR code" : "Show QR code"}
           </button>

@@ -169,7 +169,7 @@ export function CatalogueBrowser({
             </svg>
             Filters
             {activeCount > 0 && (
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-on-accent">
                 {activeCount}
               </span>
             )}
@@ -273,7 +273,7 @@ export function CatalogueBrowser({
             <button
               type="button"
               onClick={() => setDrawerOpen(false)}
-              className="mt-7 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-white"
+              className="mt-7 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-on-accent"
             >
               Show {visible.length} {visible.length === 1 ? "cake" : "cakes"}
             </button>
@@ -381,7 +381,7 @@ function FilterRow({
       aria-pressed={active}
       className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${
         active
-          ? "bg-accent font-semibold text-white"
+          ? "bg-accent font-semibold text-on-accent"
           : "text-ink-soft hover:bg-surface hover:text-accent"
       }`}
     >

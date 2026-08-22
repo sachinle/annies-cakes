@@ -5,6 +5,7 @@ import { SafeImage } from "@/components/SafeImage";
 import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/about" },
   title: "About Us",
   description: `How ${site.name} started in 2019 and how we still bake today — to order, by hand, in a home kitchen in ${site.contact.city}.`,
 };
@@ -143,7 +144,7 @@ export default function AboutPage() {
             <div className="mt-9 flex flex-wrap justify-center gap-3">
               <Link
                 href="/products"
-                className="rounded-full bg-ink px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-accent"
+                className="rounded-full bg-ink px-8 py-4 text-sm font-semibold text-on-accent transition-colors hover:bg-accent"
               >
                 See the Menu
               </Link>

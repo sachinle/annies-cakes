@@ -19,7 +19,7 @@ export function CartBadge() {
       {/* Hidden until the stored cart has loaded, so the count never
           flashes 0 and then jumps. */}
       {ready && count > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-white">
+        <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-bold text-on-accent">
           {count > 99 ? "99+" : count}
         </span>
       )}

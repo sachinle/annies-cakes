@@ -54,7 +54,7 @@ export function AddToCartButton({ product }: { product: PublicProduct }) {
                 aria-pressed={variantLabel === v.label}
                 className={`rounded-full border px-4 py-2 text-sm font-medium transition-colors ${
                   variantLabel === v.label
-                    ? "border-accent bg-accent text-white"
+                    ? "border-accent bg-accent text-on-accent"
                     : "border-border text-ink hover:border-accent"
                 }`}
               >
@@ -91,7 +91,7 @@ export function AddToCartButton({ product }: { product: PublicProduct }) {
         <button
           type="button"
           onClick={handleAdd}
-          className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition-all hover:shadow-[var(--shadow-lift)] ${
+          className={`flex-1 rounded-full px-6 py-3 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:shadow-[var(--shadow-lift)] ${
             added ? "bg-success" : "bg-accent hover:bg-accent-hover"
           }`}
         >

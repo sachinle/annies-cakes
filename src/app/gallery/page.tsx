@@ -5,6 +5,7 @@ import { SafeImage } from "@/components/SafeImage";
 import { Reveal } from "@/components/Reveal";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/gallery" },
   title: "Gallery",
   description: "Photos of cakes we've made for real orders.",
 };
@@ -42,7 +43,7 @@ export default function GalleryPage() {
         <div className="mt-14 text-center">
           <Link
             href="/products"
-            className="inline-flex rounded-full bg-ink px-8 py-4 text-sm font-semibold text-white transition-colors hover:bg-accent"
+            className="inline-flex rounded-full bg-ink px-8 py-4 text-sm font-semibold text-on-accent transition-colors hover:bg-accent"
           >
             Order a Cake
           </Link>

@@ -53,7 +53,7 @@ export function HeaderNav({ signedIn }: { signedIn: boolean }) {
 
         <Link
           href="/products"
-          className="hidden rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover md:inline-flex"
+          className="hidden rounded-full bg-accent px-5 py-2.5 text-sm font-semibold text-on-accent transition-colors hover:bg-accent-hover md:inline-flex"
         >
           Order Your Cake
         </Link>
