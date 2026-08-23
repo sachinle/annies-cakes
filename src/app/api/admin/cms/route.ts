@@ -42,7 +42,8 @@ export async function GET(request: Request) {
   try {
     await requireOwner(request);
     const db = getSupabaseAdmin();
-    const resource = new URL(request.url).searchParams.get("resource");
+    const query = new URL(request.url).searchParams;
+    const resource = query.get("resource");
 
     switch (resource) {
       case "content": {
@@ -133,6 +134,117 @@ export async function GET(request: Request) {
             totalOrders: orders.count ?? 0,
             pendingReviews: reviews.count ?? 0,
             registeredUsers: customers.count ?? 0,
+          },
+          cors
+        );
+      }
+
+      // Website analytics for Leo Billing's Analytics screen.
+      //
+      // Aggregated here rather than in the app: the raw orders table
+      // holds customer names, phones and addresses, and none of that
+      // needs to cross the network to draw a chart. Only counts and
+      // sums leave this function.
+      case "website_analytics": {
+        // Clamped: an unbounded window would let one request scan the whole
+        // orders table.
+        const days = Math.min(Math.max(num(query.get("days") ?? 30) || 30, 7), 365);
+        const since = new Date(Date.now() - days * 86400_000).toISOString();
+
+        const [ordersRes, customersRes, itemsRes] = await Promise.all([
+          db
+            .from("orders")
+            .select("created_at, status, fulfillment_type, estimated_total, pincode")
+            .gte("created_at", since)
+            .order("created_at", { ascending: true }),
+          db
+            .from("website_customers")
+            .select("created_at")
+            .gte("created_at", since),
+          db
+            .from("order_items")
+            .select("product_name, quantity, line_total, order_id")
+            .gte("created_at", since),
+        ]);
+
+        if (ordersRes.error) throw ordersRes.error;
+
+        const orders = ordersRes.data ?? [];
+        const dayKey = (iso: string) => String(iso).slice(0, 10);
+
+        // Dense series: every day in the window gets a point, so a quiet
+        // day shows as zero instead of the chart silently skipping it.
+        const series: Record<string, { orders: number; revenue: number; customers: number }> = {};
+        for (let i = 0; i < days; i++) {
+          const d = new Date(Date.now() - (days - 1 - i) * 86400_000);
+          series[d.toISOString().slice(0, 10)] = { orders: 0, revenue: 0, customers: 0 };
+        }
+
+        const byStatus: Record<string, number> = {};
+        const byFulfilment: Record<string, number> = {};
+        const byPincode: Record<string, number> = {};
+        let revenue = 0;
+        let cancelled = 0;
+        let completed = 0;
+
+        for (const o of orders) {
+          const k = dayKey(o.created_at);
+          if (series[k]) {
+            series[k].orders += 1;
+            series[k].revenue += Number(o.estimated_total ?? 0);
+          }
+          byStatus[o.status] = (byStatus[o.status] ?? 0) + 1;
+          byFulfilment[o.fulfillment_type] = (byFulfilment[o.fulfillment_type] ?? 0) + 1;
+          if (o.pincode) byPincode[o.pincode] = (byPincode[o.pincode] ?? 0) + 1;
+
+          // Cancelled orders are excluded from revenue — counting money
+          // that was never taken makes the number a fiction.
+          if (o.status === "cancelled") cancelled += 1;
+          else revenue += Number(o.estimated_total ?? 0);
+          if (o.status === "completed") completed += 1;
+        }
+
+        for (const c of customersRes.data ?? []) {
+          const k = dayKey(c.created_at);
+          if (series[k]) series[k].customers += 1;
+        }
+
+        const productTotals: Record<string, { qty: number; revenue: number }> = {};
+        for (const it of itemsRes.data ?? []) {
+          const name = it.product_name ?? "Unknown";
+          productTotals[name] = productTotals[name] ?? { qty: 0, revenue: 0 };
+          productTotals[name].qty += Number(it.quantity ?? 0);
+          productTotals[name].revenue += Number(it.line_total ?? 0);
+        }
+
+        const topProducts = Object.entries(productTotals)
+          .map(([name, v]) => ({ name, ...v }))
+          .sort((a, b) => b.qty - a.qty)
+          .slice(0, 8);
+
+        const paidOrders = orders.length - cancelled;
+
+        return ok(
+          {
+            days,
+            totals: {
+              orders: orders.length,
+              revenue: Math.round(revenue),
+              cancelled,
+              completed,
+              newCustomers: (customersRes.data ?? []).length,
+              averageOrderValue: paidOrders > 0 ? Math.round(revenue / paidOrders) : 0,
+              cancellationRate:
+                orders.length > 0 ? Math.round((cancelled / orders.length) * 100) : 0,
+            },
+            series: Object.entries(series).map(([date, v]) => ({ date, ...v })),
+            byStatus,
+            byFulfilment,
+            topPincodes: Object.entries(byPincode)
+              .map(([pincode, count]) => ({ pincode, count }))
+              .sort((a, b) => b.count - a.count)
+              .slice(0, 6),
+            topProducts,
           },
           cors
         );

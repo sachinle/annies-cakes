@@ -123,7 +123,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         )}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="flex min-h-full flex-col bg-background pb-16 text-ink md:pb-0">
+      <body className="flex min-h-full flex-col bg-background pb-[7.5rem] text-ink md:pb-0">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-full focus:bg-accent focus:px-5 focus:py-3 focus:text-sm focus:font-semibold focus:text-on-accent"

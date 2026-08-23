@@ -94,9 +94,7 @@ function ReviewCard({
         </div>
       </div>
 
-      <div className="mt-4 text-sm text-star" aria-label={`${rating} out of 5`}>
-        {"★".repeat(rating)}
-      </div>
+      <Stars rating={rating} />
 
       <blockquote className="mt-2.5 line-clamp-6 text-sm leading-relaxed text-ink-soft">
         {text}
@@ -118,12 +116,27 @@ function ReviewCard({
 // failed. These are fixed hex values rather than theme tokens because
 // the theme tokens are tuned for surfaces and borders, not for being a
 // text background.
+// Plain hex, applied as an inline style rather than a Tailwind class.
+//
+// These were `bg-[#a83f5e]` and friends, chosen from this array at
+// runtime. That works only if Tailwind's build-time scanner has emitted
+// a rule for every one of them — which depends on the scanner, the dev
+// cache and HMR all being in step. When any of those is stale the class
+// resolves to nothing, the circle is transparent, and white initials on
+// a white card vanish while still taking up space.
+//
+// An inline background has no build step to be out of step with. It is
+// the one way to guarantee the avatar is never invisible.
+//
+// Each value clears 4.5:1 against white text (the ratio is noted), which
+// is why they are fixed hex rather than theme tokens — the theme tokens
+// are tuned for surfaces, not for carrying text.
 const AVATAR_COLOURS = [
-  "bg-[#a83f5e]", // rose      5.94:1
-  "bg-[#8a5e19]", // amber     5.68:1
-  "bg-[#3d7a59]", // green     5.09:1
-  "bg-[#2f6f8f]", // blue      5.54:1
-  "bg-[#7a4a8f]", // violet    6.56:1
+  "#a83f5e", // rose    5.94:1
+  "#8a5e19", // amber   5.68:1
+  "#3d7a59", // green   5.09:1
+  "#2f6f8f", // blue    5.54:1
+  "#7a4a8f", // violet  6.56:1
 ];
 
 function Avatar({ name }: { name: string }) {
@@ -143,9 +156,56 @@ function Avatar({ name }: { name: string }) {
   return (
     <span
       aria-hidden="true"
-      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${colour}`}
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+      style={{ backgroundColor: colour, color: "#ffffff" }}
     >
       {initials || "?"}
     </span>
+  );
+}
+
+// Star rating.
+//
+// Drawn as SVG rather than the "★" character. A glyph renders
+// differently on every platform (and on Android often as an emoji), and
+// its colour is text, which WCAG holds to 4.5:1 — that forced the old
+// #96661c, a gold so dark it read as brown.
+//
+// As a shape it is a graphic, which needs 3:1 for its *boundary*. The
+// darker stroke supplies that (#a8721f is 4.12:1 on white), which frees
+// the fill to be an actual gold.
+//
+// All five stars always render, with the unearned ones hollow, so a
+// four-star review reads as four-out-of-five rather than just "four
+// stars" floating with nothing to compare against.
+const STAR_FILL = "#f5a623";
+const STAR_EDGE = "#a8721f";
+const STAR_EMPTY = "#e8e0d6";
+
+function Stars({ rating }: { rating: number }) {
+  const filled = Math.max(0, Math.min(5, Math.round(rating)));
+
+  return (
+    <div
+      className="mt-4 flex gap-0.5"
+      role="img"
+      aria-label={`${filled} out of 5 stars`}
+    >
+      {[0, 1, 2, 3, 4].map((i) => (
+        <svg
+          key={i}
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          fill={i < filled ? STAR_FILL : STAR_EMPTY}
+          stroke={i < filled ? STAR_EDGE : "#cfc4b6"}
+          strokeWidth="1.4"
+          strokeLinejoin="round"
+        >
+          <path d="M12 2.6l2.95 5.98 6.6.96-4.775 4.655 1.127 6.573L12 17.67l-5.902 3.098 1.127-6.573L2.45 9.54l6.6-.96z" />
+        </svg>
+      ))}
+    </div>
   );
 }

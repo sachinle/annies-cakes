@@ -97,11 +97,12 @@ export const site = {
 
   // ── Marquee strip under the hero ────────────────────────
   marquee: [
-    "Freshly Baked",
-    "Handcrafted",
+    "Freshly Baked Daily",
+    "No Preservatives",
+    "100% Homemade",
     "Custom Designs",
     "Made to Order",
-    "Local Delivery",
+    "Coimbatore Delivery",
   ],
 
   // ── Trust numbers. Real figures only. ───────────────────
@@ -432,9 +433,13 @@ export const site = {
 
   // ── SEO defaults ────────────────────────────────────────
   seo: {
-    title: "Annie's Homemade Cakes — Fresh, Made to Order in Coimbatore",
+    // Kept under ~60 characters so Google shows it whole, and leads with
+    // the phrase people actually search: "homemade cakes Coimbatore".
+    title: "Best Homemade Cakes in Coimbatore | No Preservatives",
+    // Under ~155 characters for the same reason. Every claim here is
+    // true of the business — nothing invented to chase a keyword.
     description:
-      "Homemade cakes baked fresh to order in Coimbatore. Birthday cakes, bento cakes, custom designs and brownies, made by hand in a home kitchen.",
+      "Freshly made homemade cakes in Coimbatore, baked to order with no preservatives. Birthday cakes, bento cakes, brownies and custom designs, delivered locally.",
   },
 } as const;
 

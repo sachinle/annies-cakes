@@ -11,7 +11,7 @@ export default function FaqPage() {
   return (
     <PlaceholderPage
       title="FAQ"
-      body="Answers to common questions (order timing, eggless options, delivery) are coming soon."
+      body="Answers to common questions (order timing, custom designs, delivery areas) are coming soon."
     />
   );
 }

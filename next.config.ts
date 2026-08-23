@@ -75,14 +75,16 @@ const nextConfig: NextConfig = {
 
     return [
       { source: "/:path*", headers: security },
-      // Immutable build assets. Hashed filenames mean a stale copy is
-      // impossible, so they can be cached indefinitely.
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
+      // No custom Cache-Control for /_next/static here on purpose.
+      //
+      // Vercel already serves those with
+      // `public,max-age=31536000,immutable` (Next 16 emits them under
+      // /_next/static/immutable/), so a rule of our own added nothing —
+      // and in `next dev` it was harmful: dev rebuilds chunks under the
+      // same paths, so a year-long TTL made the browser serve stale
+      // JavaScript and never pick up edits. Next warns about exactly
+      // this on boot. Verified against the deployment: the header is
+      // already correct without us.
       {
         source: "/:file(favicon.ico|logo.png|icon-192.png|apple-icon.png)",
         headers: [

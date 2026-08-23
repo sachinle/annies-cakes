@@ -302,7 +302,7 @@ body {
 }
 
 .cake-loader__label::after {
-  content: "6"; /* … */
+  content: "…"; /* literal ellipsis, never a CSS escape */
   display: inline-block;
   animation: loader-dots 1.6s ease-in-out infinite alternate;
 }
@@ -355,4 +355,250 @@ body {
   .cake-loader__shine,
   .skeleton::after { animation: none !important; }
   .cake-loader__layer, .cake-loader__cherry { opacity: 1; }
+}
+
+/* ── Mobile bottom navigation ────────────────────────────────
+   Written as real CSS, not Tailwind utilities. The geometry needs exact
+   values, and arbitrary-value classes only render if the stylesheet the
+   browser holds was generated with them — a stale cached stylesheet had
+   already collapsed this bar once. */
+
+.mnav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  padding: 0 12px max(12px, env(safe-area-inset-bottom));
+  /* Only the bar catches taps, so the page still scrolls at the edges. */
+  pointer-events: none;
+}
+
+/* The bar and its hump are two elements, but they must read as ONE
+   shape. The trick is here: neither child has a border or a shadow of
+   its own — they share an identical background so their overlap is
+   invisible — and the shadow lives on this wrapper as a `filter`.
+   A filter drop-shadow traces the *union* of what it contains, so the
+   outline follows the bar and swells around the hump as a single
+   continuous edge.
+
+   Bordering them separately is what produced the seam: two outlines
+   crossing each other, so the hump looked like a dome parked on top of
+   the bar rather than the bar rising into it. */
+/* Unfiltered positioning context.
+   The basket button must anchor to the bar's own box. Anchoring it to
+   .mnav instead put it 44px above a hump that only rises 20px, so it
+   floated clear of the shape. This wrapper carries NO filter, so the
+   button can sit inside it (and position against it) without being
+   swallowed by the drop-shadow. */
+.mnav__stack {
+  position: relative;
+  pointer-events: auto;
+  margin: 0 auto;
+  max-width: 420px;
+  /* The entrance lives here, not on .mnav__shape. The button is
+     positioned against this element, so animating the shape moved the
+     bar while the button stayed put — they visibly came apart for the
+     length of the animation. Animating the stack moves the whole
+     assembly as one. */
+  animation: mnav-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mnav__shape {
+  position: relative;
+  filter:
+    drop-shadow(0 1px 0 color-mix(in srgb, var(--color-border) 90%, transparent))
+    drop-shadow(0 10px 24px rgba(95, 77, 64, 0.16));
+}
+
+@keyframes mnav-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.mnav__bar {
+  background: linear-gradient(
+    180deg,
+    var(--color-surface) 0%,
+    color-mix(in srgb, var(--color-pink) 40%, var(--color-surface)) 100%
+  );
+}
+
+/* Solid, and deliberately the exact colour the bar's gradient STARTS
+   with. The hump sits above the bar's top edge, so that is the only
+   colour it ever has to meet — matching one stop is reliable, whereas
+   trying to continue the gradient across two separately-sized boxes is
+   not. */
+.mnav__hump { background: var(--color-surface); }
+
+.mnav__bar {
+  position: relative;
+  z-index: 1;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  border-radius: 26px;
+}
+
+/* Sits behind the bar. Its lower half is covered by the bar's own
+   background, which is why they must match exactly. */
+.mnav__hump {
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  /* Concentric with the button: hump centre (-34 + 38 = 4) matches
+     button centre (-24 + 28 = 4), which leaves an even 10px ring of bar
+     colour all the way round. Sizing these independently is what left
+     the button poking 6px out of the top of the hump. */
+  top: -34px;
+  width: 76px;
+  height: 76px;
+  margin-left: -38px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mnav__slot { width: 68px; flex-shrink: 0; }
+
+/* ── Tabs ── */
+.mnav__tab {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 2px 6px;
+  border-radius: 16px;
+  color: var(--color-muted);
+  transition: color 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mnav__tab[aria-current="page"] { color: var(--color-accent); }
+
+/* Soft pill behind the active tab, scaled in rather than toggled. */
+.mnav__tab::before {
+  content: "";
+  position: absolute;
+  inset: 2px 6px;
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--color-accent) 11%, transparent);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mnav__tab[aria-current="page"]::before { opacity: 1; transform: scale(1); }
+
+.mnav__icon {
+  position: relative;
+  display: block;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.mnav__tab[aria-current="page"] .mnav__icon { transform: translateY(-1px) scale(1.06); }
+
+.mnav__label {
+  position: relative;
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 500;
+}
+.mnav__tab[aria-current="page"] .mnav__label { font-weight: 700; }
+
+.mnav__dot {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.25s ease 0.05s, transform 0.25s cubic-bezier(0.34, 1.6, 0.5, 1) 0.05s;
+}
+.mnav__tab[aria-current="page"] .mnav__dot { opacity: 1; transform: scale(1); }
+
+.mnav__divider {
+  width: 1px;
+  height: 26px;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--color-border) 85%, transparent);
+}
+
+/* ── Raised basket button ──
+   Outside .mnav__shape, so the wrapper's drop-shadow traces only the
+   bar silhouette and not a blob around the button too. */
+.mnav__fab {
+  position: absolute;
+  z-index: 3;
+  /* .mnav is pointer-events:none so the page scrolls at the edges; this
+     is no longer inside .mnav__shape, so it has to opt back in itself. */
+  pointer-events: auto;
+  left: 50%;
+  top: -24px;
+  width: 56px;
+  height: 56px;
+  margin-left: -28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #e0567a 0%, var(--color-accent) 55%, #a8264a 100%);
+  box-shadow:
+    0 8px 20px rgba(198, 47, 82, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  transition: transform 0.2s cubic-bezier(0.34, 1.5, 0.5, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.mnav__fab:active { transform: scale(0.92); }
+
+/* Slow breathing halo — life on the primary action without moving
+   anything in the layout. */
+.mnav__fab::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--color-accent) 38%, transparent);
+  animation: mnav-halo 2.8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes mnav-halo {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%      { opacity: 0;   transform: scale(1.2); }
+}
+
+.mnav__badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  border-radius: 999px;
+  border: 2px solid var(--color-surface);
+  background: var(--color-ink);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: mnav-badge-pop 0.3s cubic-bezier(0.34, 1.6, 0.5, 1) both;
+}
+@keyframes mnav-badge-pop {
+  from { transform: scale(0); }
+  to   { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mnav__stack, .mnav__badge { animation: none; }
+  .mnav__fab::after { animation: none; opacity: 0.35; }
+  .mnav__tab::before, .mnav__icon, .mnav__dot { transition: none; }
 }

@@ -7,6 +7,23 @@ import { formatMoney } from "@/lib/order-schema";
 
 type SortKey = "featured" | "price-asc" | "price-desc" | "name";
 
+/**
+ * Locale-independent name comparison.
+ *
+ * NOT localeCompare. That uses the host's ICU collation, and Node and
+ * the browser do not always agree — so the server and the client sorted
+ * the catalogue differently, the cards came out in a different order,
+ * and `priority={i < 2}` landed on a different image on each side. The
+ * result was a hydration mismatch on next/image's `loading` attribute
+ * ("loading=lazy" on the server, undefined on the client).
+ *
+ * A plain code-unit comparison is identical everywhere, which is what
+ * this needs to be.
+ */
+function byName(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 const SORTS: Array<{ key: SortKey; label: string }> = [
   { key: "featured", label: "Our picks" },
   { key: "price-asc", label: "Price: low to high" },
@@ -76,12 +93,12 @@ export function CatalogueBrowser({
         sorted.sort((a, b) => startingPrice(b) - startingPrice(a));
         break;
       case "name":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        sorted.sort((a, b) => byName(a.name, b.name));
         break;
       default:
         sorted.sort(
           (a, b) => Number(b.isFeatured) - Number(a.isFeatured) ||
-            a.name.localeCompare(b.name)
+            byName(a.name, b.name)
         );
     }
     return sorted;

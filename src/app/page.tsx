@@ -60,11 +60,31 @@ export default async function Home() {
     ].filter(Boolean),
   };
 
+  // FAQPage markup, built from the same six questions the page already
+  // shows. Google can surface these as an expandable block in results,
+  // which takes up more space and answers the question before the click.
+  //
+  // Built from the rendered content deliberately — schema that does not
+  // match what a visitor sees is a manual-action risk, not a shortcut.
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: site.faq.items.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: { "@type": "Answer", text: item.a },
+    })),
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
 
       <Hero />
