@@ -99,6 +99,29 @@ export async function GET(request: Request) {
         return ok(data ?? [], cors);
       }
 
+      // Which check customers actually get right now.
+      //
+      // The owner manages both lists, but only one is live: map zones
+      // win whenever any is active, pincodes cover the rest. Saying so
+      // explicitly in the UI stops "I added a pincode and nothing
+      // changed" being a mystery.
+      case "delivery_mode": {
+        const [zones, pins] = await Promise.all([
+          db.from("delivery_zones").select("id", { count: "exact", head: true }).eq("is_active", true),
+          db.from("service_pincodes").select("id", { count: "exact", head: true }).eq("is_active", true),
+        ]);
+        const activeZones = zones.error ? 0 : (zones.count ?? 0);
+        const activePins = pins.error ? 0 : (pins.count ?? 0);
+        return ok(
+          {
+            activeZones,
+            activePincodes: activePins,
+            mode: activeZones > 0 ? "map" : activePins > 0 ? "pincode" : "none",
+          },
+          cors
+        );
+      }
+
       case "zones": {
         const { data, error } = await db
           .from("delivery_zones")
