@@ -99,6 +99,15 @@ export async function GET(request: Request) {
         return ok(data ?? [], cors);
       }
 
+      case "zones": {
+        const { data, error } = await db
+          .from("delivery_zones")
+          .select("*")
+          .order("id");
+        if (error) throw error;
+        return ok(data ?? [], cors);
+      }
+
       case "pincodes": {
         const { data, error } = await db
           .from("service_pincodes")
@@ -386,6 +395,93 @@ export async function POST(request: Request) {
       // behind the cache until it expired on its own.
       case "revalidate_products": {
         updateTag(PRODUCTS_TAG);
+        return ok({ ok: true }, cors);
+      }
+
+      // ── Delivery zones (map-drawn) ──
+      //
+      // Validated here as well as by the CHECK constraints in migration
+      // 0016. The database is the real guard, but rejecting a bad shape
+      // at the API gives the owner a readable message instead of a
+      // constraint violation.
+      case "save_zone": {
+        const name = str(body.name).trim();
+        const shape = str(body.shape);
+        if (!name) return bad("Give the zone a name.", 400, cors);
+        if (shape !== "circle" && shape !== "polygon") {
+          return bad("Unknown zone shape.", 400, cors);
+        }
+
+        const row: Record<string, unknown> = {
+          name,
+          shape,
+          delivery_fee: num(body.delivery_fee),
+          is_active: body.is_active !== false,
+          updated_at: new Date().toISOString(),
+        };
+
+        if (shape === "circle") {
+          const lat = Number(body.center_lat);
+          const lng = Number(body.center_lng);
+          const radius = Math.round(Number(body.radius_m));
+          if (!Number.isFinite(lat) || lat < -90 || lat > 90) {
+            return bad("Pick a valid point on the map.", 400, cors);
+          }
+          if (!Number.isFinite(lng) || lng < -180 || lng > 180) {
+            return bad("Pick a valid point on the map.", 400, cors);
+          }
+          if (!Number.isFinite(radius) || radius <= 0) {
+            return bad("Radius must be greater than zero.", 400, cors);
+          }
+          row.center_lat = lat;
+          row.center_lng = lng;
+          row.radius_m = radius;
+          row.polygon = null;
+        } else {
+          const raw = Array.isArray(body.polygon) ? body.polygon : [];
+          const ring = raw
+            .map((pt: unknown) => (Array.isArray(pt) ? [Number(pt[0]), Number(pt[1])] : null))
+            .filter(
+              (pt): pt is number[] =>
+                pt !== null &&
+                Number.isFinite(pt[0]) && pt[0] >= -90 && pt[0] <= 90 &&
+                Number.isFinite(pt[1]) && pt[1] >= -180 && pt[1] <= 180
+            );
+          if (ring.length < 3) {
+            return bad("A shape needs at least three points.", 400, cors);
+          }
+          row.polygon = ring;
+          row.center_lat = null;
+          row.center_lng = null;
+          row.radius_m = null;
+        }
+
+        const id = body.id ? Number(body.id) : null;
+        const query = id
+          ? db.from("delivery_zones").update(row).eq("id", id)
+          : db.from("delivery_zones").insert(row);
+
+        const { error } = await query;
+        if (error) throw error;
+
+        return ok({ ok: true }, cors);
+      }
+
+      case "set_zone_active": {
+        const { error } = await db
+          .from("delivery_zones")
+          .update({ is_active: Boolean(body.is_active), updated_at: new Date().toISOString() })
+          .eq("id", Number(body.id));
+        if (error) throw error;
+        return ok({ ok: true }, cors);
+      }
+
+      case "delete_zone": {
+        const { error } = await db
+          .from("delivery_zones")
+          .delete()
+          .eq("id", Number(body.id));
+        if (error) throw error;
         return ok({ ok: true }, cors);
       }
 

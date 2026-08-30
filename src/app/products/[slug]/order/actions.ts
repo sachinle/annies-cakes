@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server-auth";
 import { getProductBySlug } from "@/lib/products";
 import { sendNewOrderEmail, sendOrderConfirmationEmail } from "@/lib/notify";
 import { pushNewOrder } from "@/lib/telegram";
-import { checkPincode } from "@/lib/delivery";
+import { checkPincode, checkLocation, zonesConfigured } from "@/lib/delivery";
 import { getStoreStatus } from "@/lib/store-status";
 import {
   hasErrors,
@@ -80,14 +80,30 @@ export async function placeOrder(
   // but that result can't be trusted — someone could submit delivery to
   // an area we don't cover, and we'd only find out after promising it.
   if (input.fulfillmentType === "delivery") {
-    const area = await checkPincode(input.pincode);
-    if (!area.serviceable) {
-      return {
-        errors: {
-          pincode:
-            "We don't deliver to that pincode. Please choose pickup, or arrange your own courier.",
-        },
-      };
+    // Map zones take precedence once any are drawn, falling back to
+    // the pincode list otherwise — so migration 0016 changes nothing
+    // until the owner actually draws an area.
+    if (await zonesConfigured()) {
+      const zone = await checkLocation(input.latitude, input.longitude);
+      if (!zone.serviceable) {
+        return {
+          errors: {
+            pincode: zone.distanceText
+              ? `You are about ${zone.distanceText} away, outside the area we deliver to. Please choose pickup, or message us.`
+              : "That address is outside the area we deliver to. Please choose pickup, or message us.",
+          },
+        };
+      }
+    } else {
+      const area = await checkPincode(input.pincode);
+      if (!area.serviceable) {
+        return {
+          errors: {
+            pincode:
+              "We don't deliver to that pincode. Please choose pickup, or arrange your own courier.",
+          },
+        };
+      }
     }
   }
 

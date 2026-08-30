@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server-auth";
 import { getOrCreateProfile } from "@/lib/customer";
+import { zonesConfigured } from "@/lib/delivery";
 import { CheckoutForm } from "./CheckoutForm";
 
 export const metadata: Metadata = {
@@ -16,7 +17,12 @@ export default async function CheckoutPage() {
   const user = await getUser();
   if (!user) redirect("/signin?next=%2Fcheckout");
 
-  const profile = await getOrCreateProfile();
+  // Decides which serviceability question the form asks: a GPS check
+  // once any map zone exists, the pincode box until then.
+  const [profile, useZones] = await Promise.all([
+    getOrCreateProfile(),
+    zonesConfigured(),
+  ]);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 sm:py-16">
@@ -41,6 +47,7 @@ export default async function CheckoutPage() {
         savedLandmark={profile?.landmark ?? ""}
         savedCity={profile?.city ?? ""}
         savedPincode={profile?.pincode ?? ""}
+        useZones={useZones}
       />
     </div>
   );

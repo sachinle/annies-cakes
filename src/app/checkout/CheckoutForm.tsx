@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { placeCartOrder, type CheckoutState } from "./actions";
 import { checkDeliveryPincode } from "@/app/products/[slug]/order/pincode-action";
+import { LocationCheck } from "@/components/checkout/LocationCheck";
+import type { LocationResult } from "@/lib/delivery";
 import { useCart } from "@/components/cart/CartProvider";
 import { DatePicker } from "@/components/ui/DatePicker";
 import { Select } from "@/components/ui/Select";
@@ -22,6 +24,7 @@ export function CheckoutForm({
   savedLandmark = "",
   savedCity = "",
   savedPincode = "",
+  useZones = false,
 }: {
   defaultName: string;
   defaultPhone: string;
@@ -31,6 +34,9 @@ export function CheckoutForm({
   savedLandmark?: string;
   savedCity?: string;
   savedPincode?: string;
+  /** True once the owner has drawn at least one map zone. Switches
+   *  the serviceability question from a pincode to a GPS check. */
+  useZones?: boolean;
 }) {
   const { lines, total, ready } = useCart();
   const [state, formAction, pending] = useActionState<CheckoutState, FormData>(
@@ -44,6 +50,16 @@ export function CheckoutForm({
   const [pincode, setPincode] = useState(savedPincode);
   const [pinResult, setPinResult] = useState<PincodeResult | null>(null);
   const [checkingPin, setCheckingPin] = useState(false);
+  // Result of the GPS check, used instead of pinResult when the
+  // owner has drawn map zones.
+  const [zoneResult, setZoneResult] = useState<LocationResult | null>(null);
+
+  // One answer for the form, whichever check produced it. The
+  // server re-checks on submit regardless, so this only decides what
+  // is shown.
+  const deliveryOk = useZones
+    ? Boolean(zoneResult?.serviceable)
+    : Boolean(pinResult?.serviceable);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
 
@@ -245,6 +261,16 @@ export function CheckoutForm({
 
           {fulfillment === "delivery" && (
             <>
+              {useZones ? (
+                /* Map zones are configured, so the real question is
+                   "where are you", not "what is your pincode". */
+                <LocationCheck
+                  onResult={(r, c) => {
+                    setZoneResult(r);
+                    if (r.serviceable) setCoords(c);
+                  }}
+                />
+              ) : (
               <div className="rounded-lg border border-border bg-surface p-4">
                 <p className="text-sm font-medium text-ink">
                   First, can we deliver to you?
@@ -306,8 +332,9 @@ export function CheckoutForm({
                   </div>
                 )}
               </div>
+              )}
 
-              {pinResult?.serviceable && (
+              {deliveryOk && (
                 <>
                   <Field label="Delivery address" error={errors.address}>
                     <textarea
