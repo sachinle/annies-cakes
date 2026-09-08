@@ -4,10 +4,18 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileStickyBar } from "@/components/layout/MobileStickyBar";
 import { NavProgress } from "@/components/layout/NavProgress";
+import { GoogleTagManager } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { getUser } from "@/lib/supabase/server-auth";
 import { site } from "@/content/site";
 import { siteConfig } from "@/lib/site-config";
+
+// GTM container. Read from the environment so a fork or a staging
+// deploy can point at a different container without a code change,
+// with the live container as the default.
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-PVJBFG4B";
 
 const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
@@ -123,6 +131,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         )}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
+      {/* Google Tag Manager. Next's component rather than the raw
+          console snippet: it loads the container after hydration so
+          it never blocks first paint, injects the <noscript> iframe
+          itself, and keeps the inline script out of the React tree.
+          The container ID is public by design - it identifies the
+          container, it does not grant access to it. */}
+      <GoogleTagManager gtmId={GTM_ID} />
+
       <body className="flex min-h-full flex-col bg-background pb-[7.5rem] text-ink md:pb-0">
         <a
           href="#main-content"
@@ -136,6 +152,19 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <main id="main-content" className="flex-1">{children}</main>
           <Footer />
           <MobileStickyBar />
+
+          {/* Page views and Core Web Vitals from real visitors.
+              Chosen over Google Analytics deliberately: no cookies, no
+              cross-site identifiers and no consent banner needed under
+              GDPR/DPDP, which matters for a shop whose customers are
+                mostly on a phone.
+
+              SpeedInsights also reports field LCP, which is the only
+              reliable way to see what real devices experience — the lab
+              run has been returning NO_LCP, and field data does not
+              depend on that trace completing. */}
+          <Analytics />
+          <SpeedInsights />
         </CartProvider>
       </body>
     </html>

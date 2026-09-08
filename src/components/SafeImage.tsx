@@ -16,6 +16,7 @@ export function SafeImage({
   height,
   sizes,
   priority = false,
+  fetchPriority,
   className = "",
   label,
 }: {
@@ -26,6 +27,10 @@ export function SafeImage({
   height?: number;
   sizes?: string;
   priority?: boolean;
+  /** Explicit hint for the LCP image. `priority` alone sets
+   *  loading/preload but the browser still schedules the fetch by its
+   *  own heuristics; fetchPriority="high" tells it outright. */
+  fetchPriority?: "high" | "low" | "auto";
   className?: string;
   label?: string;
 }) {
@@ -56,6 +61,7 @@ export function SafeImage({
     src,
     sizes,
     priority,
+    fetchPriority,
     onError: () => setFailed(true),
     className,
   };

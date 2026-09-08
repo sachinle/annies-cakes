@@ -134,6 +134,7 @@ export function Hero() {
                       alt={img.alt}
                       fill
                       priority={i === 0}
+                      fetchPriority={i === 0 ? "high" : undefined}
                       sizes="(max-width: 768px) 85vw, 440px"
                       className="object-cover"
                       label="Add hero photo"

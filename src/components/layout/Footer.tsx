@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { ObfuscatedEmail } from "@/components/ObfuscatedEmail";
+// splitEmail comes from the plain module, not the client component:
+// a server component may render a client component but cannot call
+// a function exported from one.
+import { splitEmail } from "@/lib/email-parts";
 import { site, fullAddress, telHref, whatsappHref } from "@/content/site";
 import {
   WhatsAppIcon, InstagramIcon, FacebookIcon, ThreadsIcon, YouTubeIcon,
@@ -59,9 +64,12 @@ export function Footer() {
                 </a>
               </li>
               <li>
-                <a href={`mailto:${site.contact.email}`} className="hover:text-accent">
-                  {site.contact.email}
-                </a>
+                {/* Assembled in the browser, so the address is never a
+                    contiguous string in the HTML a harvester downloads. */}
+                <ObfuscatedEmail
+                  {...splitEmail(site.contact.email)}
+                  className="hover:text-accent"
+                />
               </li>
               <li className="pt-1">{site.contact.hours}</li>
               <li className="leading-relaxed">{fullAddress}</li>

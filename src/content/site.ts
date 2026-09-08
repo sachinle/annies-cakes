@@ -24,12 +24,23 @@ export const site = {
     phone: "9524144650",
     whatsapp: "919524144650", // full international format, no +
     email: "sachinannie172@gmail.com",
-    address: "5/140/8 Pari Nagar, Thambagoundenpalayam, Arisipalayam",
+    address:
+      // Spelled to match the Google Business Profile character for
+      // character. NAP consistency is a ranking signal, and the site
+      // previously said "Pari Nagar / Arisipalayam" against the
+      // profile's "Paari Nagar / Arasipalayam", which reads as a
+      // different address.
+      "5/140/8 Paari Nagar, Nachipalyam, Thambagoundenpalayam, Arasipalayam, Madukkarai",
     city: "Coimbatore",
     state: "Tamil Nadu",
     pincode: "641032",
     hours: "Mon – Sat, 9am – 8pm",
     mapsUrl: "https://maps.app.goo.gl/3gAZbRkVEwxkdbJn9",
+    // The exact pin from the Google Business Profile. Emitted as
+    // GeoCoordinates in the schema, which is what lets Google place
+    // the business precisely rather than geocoding the address text.
+    lat: 10.8718645,
+    lng: 76.9711166,
     reviewUrl: "https://g.page/r/CUKoCxBe-E7lEBM/review",
     instagram: "https://www.instagram.com/annieshomemadecakes",
     facebook: "https://www.facebook.com/profile.php?id=100091778577677",

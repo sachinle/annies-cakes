@@ -1,4 +1,9 @@
 import type { Metadata } from "next";
+import { ObfuscatedEmail } from "@/components/ObfuscatedEmail";
+// splitEmail comes from the plain module, not the client component:
+// a server component may render a client component but cannot call
+// a function exported from one.
+import { splitEmail } from "@/lib/email-parts";
 import { site, fullAddress, telHref, whatsappHref } from "@/content/site";
 import { siteConfig } from "@/lib/site-config";
 
@@ -20,7 +25,21 @@ export default function ContactPage() {
     url: siteConfig.url,
     logo: `${siteConfig.url}/logo.png`,
     telephone: site.contact.phone,
-    email: site.contact.email,
+    // email is deliberately NOT in the structured data.
+
+    //
+
+    // JSON-LD is plain text in the HTML, so putting the address here
+
+    // undoes the client-side assembly used everywhere else and hands
+
+    // it straight to harvesters. schema.org treats email as optional
+
+    // and Google leans on name, url, logo, telephone and address for
+
+    // local results — all of which are still here. Losing it costs
+
+    // almost nothing; leaking the address costs spam forever.
     address: {
       "@type": "PostalAddress",
       streetAddress: site.contact.address,
@@ -56,7 +75,10 @@ export default function ContactPage() {
             primary
           />
           <Card title="Call" body={site.contact.phone} href={telHref()} />
-          <Card title="Email" body={site.contact.email} href={`mailto:${site.contact.email}`} />
+          {/* The address is assembled client-side rather than printed
+              into the HTML, so bulk harvesters that never run
+              JavaScript come away with nothing. */}
+          <EmailCard title="Email" />
           <Card
             title="Find us"
             body={site.contact.city}
@@ -106,5 +128,25 @@ function Card({
         {body}
       </p>
     </a>
+  );
+}
+
+/**
+ * The Email card.
+ *
+ * Its own component because the address must not be printed into the
+ * HTML — Card takes `body` and `href` as plain strings, which is exactly
+ * what a harvester scrapes. ObfuscatedEmail assembles it in the browser
+ * instead, so the served markup contains only the split halves.
+ */
+function EmailCard({ title }: { title: string }) {
+  return (
+    <div className="rounded-[var(--radius-card)] border border-border bg-surface p-6 transition-all hover:-translate-y-1 hover:shadow-[var(--shadow-soft)]">
+      <p className="font-display text-xl text-ink">{title}</p>
+      <ObfuscatedEmail
+        {...splitEmail(site.contact.email)}
+        className="mt-1.5 block text-sm text-muted hover:text-accent"
+      />
+    </div>
   );
 }

@@ -92,11 +92,39 @@ export default async function ProductPage(props: PageProps<"/products/[slug]">) 
     }),
   };
 
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteConfig.url },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Cakes",
+        item: `${siteConfig.url}/products`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: product.name,
+        item: `${siteConfig.url}/products/${product.slug}`,
+      },
+    ],
+  };
+
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      {/* Breadcrumbs. Google renders these in place of the raw URL in
+          results, which reads far better than a slug — and it already
+          matches the visible breadcrumb nav below, which is the
+          condition for it being eligible. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <nav aria-label="Breadcrumb" className="text-sm text-muted">

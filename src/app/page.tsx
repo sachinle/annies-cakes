@@ -40,7 +40,21 @@ export default async function Home() {
     image: `${siteConfig.url}/logo.png`,
     description: site.seo.description,
     telephone: site.contact.phone,
-    email: site.contact.email,
+    // email is deliberately NOT in the structured data.
+
+    //
+
+    // JSON-LD is plain text in the HTML, so putting the address here
+
+    // undoes the client-side assembly used everywhere else and hands
+
+    // it straight to harvesters. schema.org treats email as optional
+
+    // and Google leans on name, url, logo, telephone and address for
+
+    // local results — all of which are still here. Losing it costs
+
+    // almost nothing; leaking the address costs spam forever.
     address: {
       "@type": "PostalAddress",
       streetAddress: site.contact.address,
@@ -51,6 +65,54 @@ export default async function Home() {
     },
     // Empty entries are dropped — threads and youtube aren't filled in
     // yet, and an empty string in sameAs is a structured-data error.
+    // Local-SEO fields. These are what Google reads for the map pack
+    // and the business panel, and they were the gap: the schema had
+    // identity and address but nothing about when you are open, what
+    // you charge, or where you serve.
+    //
+    // Every value here is true of the business. Nothing is padded to
+    // look better - a schema that overstates gets a manual action, not
+    // a ranking.
+    priceRange: "₹₹",
+    currenciesAccepted: "INR",
+    paymentAccepted: "Cash, UPI",
+    hasMap: site.contact.mapsUrl,
+    // The exact pin from the Google Business Profile. Without this,
+    // Google geocodes the address string and can land the business
+    // on the wrong side of a road — which matters when half your
+    // ranking is proximity to the searcher.
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: site.contact.lat,
+      longitude: site.contact.lng,
+    },
+    areaServed: {
+      "@type": "City",
+      name: site.contact.city,
+    },
+    // Parsed from site.contact.hours ("Mon – Sat, 9am – 8pm").
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+        ],
+        opens: "09:00",
+        closes: "20:00",
+      },
+    ],
+    knowsAbout: [
+      "Birthday cakes",
+      "Bento cakes",
+      "Custom cake design",
+      "Fresh cream cakes",
+      "Brownies",
+    ],
     sameAs: [
       site.contact.instagram,
       site.contact.facebook,

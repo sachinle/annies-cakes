@@ -59,7 +59,7 @@ export function Testimonials() {
 
       <div className="mx-auto mt-12 max-w-6xl px-4 text-center sm:px-6">
         <a
-          href={site.contact.reviewUrl}
+          href={site.contact.mapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex rounded-full border-2 border-ink px-7 py-3.5 text-sm font-semibold text-ink transition-colors hover:bg-ink hover:text-white"
