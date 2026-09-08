@@ -4,7 +4,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { MobileStickyBar } from "@/components/layout/MobileStickyBar";
 import { NavProgress } from "@/components/layout/NavProgress";
-import { GoogleTagManager } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { CartProvider } from "@/components/cart/CartProvider";
@@ -16,6 +16,14 @@ import { siteConfig } from "@/lib/site-config";
 // deploy can point at a different container without a code change,
 // with the live container as the default.
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID ?? "GTM-PVJBFG4B";
+
+// GA4 measurement ID, loaded directly via gtag.js.
+//
+// IMPORTANT: this is the ONLY place GA4 should be configured. If a
+// GA4 tag with this same ID is ever added inside the GTM container
+// above, every pageview is counted twice and the numbers quietly
+// become useless. Pick one path - this one, or GTM - not both.
+const GA_ID = process.env.NEXT_PUBLIC_GA_ID ?? "G-7XVMK4YZYW";
 
 const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
   ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
@@ -138,6 +146,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           The container ID is public by design - it identifies the
           container, it does not grant access to it. */}
       <GoogleTagManager gtmId={GTM_ID} />
+      {/* Next's component rather than the raw gtag snippet: it loads
+          after hydration so it never blocks first paint, and it tracks
+          App Router client navigations as pageviews. The raw snippet
+          only fires on a full document load, so every in-app route
+          change would go unrecorded. */}
+      <GoogleAnalytics gaId={GA_ID} />
 
       <body className="flex min-h-full flex-col bg-background pb-[7.5rem] text-ink md:pb-0">
         <a
