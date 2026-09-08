@@ -45,8 +45,11 @@ export const site = {
     instagram: "https://www.instagram.com/annieshomemadecakes",
     facebook: "https://www.facebook.com/profile.php?id=100091778577677",
     // Leave blank to hide the icon in the footer.
-    threads: "",
-    youtube: "",
+    // Threads lives on threads.com now; threads.net still resolves but
+    // redirects. Both were checked before adding — a dead link in
+    // sameAs is worse than an absent one.
+    threads: "https://www.threads.com/@annieshomemadecakes",
+    youtube: "https://www.youtube.com/@anniescakesandlifestyle1183",
   },
 
   // ── Hero ────────────────────────────────────────────────
