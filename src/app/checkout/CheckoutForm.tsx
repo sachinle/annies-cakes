@@ -264,12 +264,26 @@ export function CheckoutForm({
               {useZones ? (
                 /* Map zones are configured, so the real question is
                    "where are you", not "what is your pincode". */
-                <LocationCheck
-                  onResult={(r, c) => {
-                    setZoneResult(r);
-                    if (r.serviceable) setCoords(c);
-                  }}
-                />
+                <>
+                  <LocationCheck
+                    onResult={(r, c) => {
+                      setZoneResult(r);
+                      if (r.serviceable) setCoords(c);
+                    }}
+                  />
+                  {/* The server keys every delivery-serviceability error
+                      to "pincode" regardless of which check produced it,
+                      because both paths report against the same field.
+                      There is no pincode input on this branch to show it
+                      next to — omitting this once meant a rejected order
+                      (wrong zone, or submitted before the GPS check ever
+                      ran) came back as a 200 with nothing on screen. */}
+                  {errors.pincode && (
+                    <p role="alert" className="mt-3 rounded-lg border border-error/30 bg-error/10 px-4 py-3 text-sm text-error">
+                      {errors.pincode}
+                    </p>
+                  )}
+                </>
               ) : (
               <div className="rounded-lg border border-border bg-surface p-4">
                 <p className="text-sm font-medium text-ink">
@@ -406,9 +420,16 @@ export function CheckoutForm({
           An estimate. We&apos;ll confirm the final price with you — delivery or
           custom decoration may change it. Nothing is charged now.
         </p>
+        {fulfillment === "delivery" && !deliveryOk && (
+          <p className="mt-3 text-xs text-muted">
+            {useZones
+              ? "Check your location above before sending — we need to confirm we deliver to you."
+              : "Check your pincode above before sending — we need to confirm we deliver to you."}
+          </p>
+        )}
         <button
           type="submit"
-          disabled={pending}
+          disabled={pending || (fulfillment === "delivery" && !deliveryOk)}
           className="mt-6 w-full rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-on-accent shadow-[var(--shadow-soft)] transition-all hover:bg-accent-hover hover:shadow-[var(--shadow-lift)] disabled:opacity-60"
         >
           {pending ? "Sending your request…" : "Send Order Request"}

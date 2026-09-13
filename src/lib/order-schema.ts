@@ -92,10 +92,15 @@ export function validateOrder(input: OrderInput): FieldErrors {
     if (!input.address.trim() && !hasPin) {
       errors.address = "Add an address, or share your location.";
     }
-    // Delivery requires a pincode we actually serve. The server checks
-    // it against the list again before saving — the browser's answer
-    // is only there to fail fast.
-    if (!PINCODE_RE.test(input.pincode.trim())) {
+    // A pincode is only how we check delivery when we don't already
+    // have something better. Once map zones are configured, the
+    // checkout form asks for GPS coordinates instead and never shows a
+    // pincode field at all — requiring one unconditionally here made
+    // every zone-based delivery order fail validation before it ever
+    // reached the zone check, with no field left on screen to show the
+    // resulting error against. Coordinates make the pincode redundant,
+    // so it's only required in their absence.
+    if (!hasPin && !PINCODE_RE.test(input.pincode.trim())) {
       errors.pincode = "Enter your 6-digit pincode so we can check delivery.";
     }
   }

@@ -113,10 +113,17 @@ export async function placeCartOrder(
     // Serviceability is decided HERE, on submit — never by whatever
     // the form claimed. The browser can be edited; this cannot.
     //
-    // Map zones take precedence once any are drawn, falling back to
-    // the pincode list otherwise, so migration 0016 changes nothing
-    // until the owner actually draws an area.
-    if (await zonesConfigured()) {
+    // Which check runs is decided by what the browser actually sent,
+    // not just by whether zones exist somewhere in the database.
+    // Checking zonesConfigured() alone used to mean: the moment the
+    // owner drew a single zone, EVERY delivery order everywhere — even
+    // one carrying only a pincode, with no coordinates at all — got
+    // routed into a GPS check it had no coordinates for, and was
+    // silently rejected. Coordinates only exist in a submission when a
+    // form that actually collects them was used, so their presence is
+    // what should decide the check, not a global flag.
+    const hasCoords = input.latitude !== null && input.longitude !== null;
+    if (hasCoords && (await zonesConfigured())) {
       const zone = await checkLocation(input.latitude, input.longitude);
       if (!zone.serviceable) {
         return {

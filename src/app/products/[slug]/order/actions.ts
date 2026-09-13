@@ -80,10 +80,17 @@ export async function placeOrder(
   // but that result can't be trusted — someone could submit delivery to
   // an area we don't cover, and we'd only find out after promising it.
   if (input.fulfillmentType === "delivery") {
-    // Map zones take precedence once any are drawn, falling back to
-    // the pincode list otherwise — so migration 0016 changes nothing
-    // until the owner actually draws an area.
-    if (await zonesConfigured()) {
+    // Which check runs is decided by what this form actually collected,
+    // not just by whether zones exist somewhere in the database. This
+    // form always asks for a pincode and only optionally offers "use my
+    // location" — so a customer who typed a perfectly serviceable
+    // pincode but never clicked that button has no coordinates at all.
+    // Routing them into a GPS check anyway (because the owner happens
+    // to have drawn a zone elsewhere) rejected a valid order with a
+    // confusing "outside the area" message. Coordinates only exist when
+    // that button was used, so their presence is what should decide.
+    const hasCoords = input.latitude !== null && input.longitude !== null;
+    if (hasCoords && (await zonesConfigured())) {
       const zone = await checkLocation(input.latitude, input.longitude);
       if (!zone.serviceable) {
         return {
